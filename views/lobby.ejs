@@ -9,9 +9,23 @@
 
     </style>
 </head>
-
 <body>
-    <h1>Lobby </h1>
-    
+    <div style="float: left; width: 50%;">
+        <ul id="roomlist" type="none">
+            
+        </ul>
+    </div>
+    <div style="float: left;">
+        <textarea id="chatarea" style="width: 400px; height: 600px;"></textarea>
+        <form id="chatform">
+            <input id="chatinput" autocomplete="off" type="text">
+            <button type="submit">Send</button>
+        </form>
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var inputname = "<%= username %>";
+    </script>
 </body>
 </html>

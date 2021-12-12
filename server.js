@@ -96,20 +96,20 @@ app.get('/lobby', (req, res) => {
     if(!req.user) {
         res.redirect('/login');
     } else {
-        res.render('lobby', {name: req.user.name});
+        res.render('lobby', {username: req.user.username});
     }
 });
 
 app.get('/logout', (req, res) => {
     req.logout();
-    req.redirect('/');
+    res.redirect('/login');
 });
 
 app.get('/signup', (req, res) => {
     if(!req.user) {
         res.render('signup', {message: 'input sign up data'});
     } else {
-        res.redirect('/lobby');
+        res.redirect('/lobby', {message: req.user.username});
     }
 });
 
