@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Socket.IO 예제</title>
+</head>
+<body>
+    <div style="float: left; width: 50%;">
+        <ul id="gamedata" type="none">
+            <li id="username"></li>
+            <li id="usercount"></li>
+            <li id="userchip"></li>
+            <li id="myhand"></li>
+            <li id="board"></li>
+            <li id="pot"></li>
+        </ul>
+        <ul id="messages" type="none">
+            
+        </ul>
+    
+        <div id = "control" style="display: none;">
+            <form id="betform">
+                <input id="betinput" autocomplete="off" type="text">
+                <button type="submit">Bet</button>
+            </form>
+            
+            <form id="checkform">
+                <button type="submit">Check</button>
+            </form>
+    
+            <form id="callform">
+                <button type="submit">Call</button>
+            </form>
+        
+            <form id="foldform">
+                <button type="submit">Fold</button>
+            </form>
+        </div>
+    </div>
+    <div style="float: left;">
+        <textarea id="chatarea" style="width: 400px; height: 600px;"></textarea>
+        <form id="chatform">
+            <input id="chatinput" autocomplete="off" type="text">
+            <button type="submit">Send</button>
+        </form>
+    </div>
+    
+    
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var inputname = prompt("Enter username", ""); // 유저 이름 입력 받기
+        var socket = io();
+        socket.emit('newplayer', inputname);
+        var player = {};
+
+        var betform = document.getElementById('betform');
+        var checkform = document.getElementById('checkform');
+        var callform = document.getElementById('callform');
+        var foldform = document.getElementById('foldform');
+
+        // socket.on 함수로 서버에서 전달하는 신호를 수신
+        socket.on('setStatus', (data) => {
+            player = JSON.parse(JSON.stringify(data.player));
+            var userName = document.getElementById('username');
+            userName.innerText = "Name : " + player.username;
+            var userCounter = document.getElementById('usercount');
+            userCounter.innerText = "Player count : " + data.playerCount;
+            var userChip = document.getElementById('userchip');
+            userChip.innerText = "Chips : " + player.chip;
+        });
+
+        socket.on('startGame', (data) => { // 게임 시작됩을 알려주는 응답
+            var messageList = document.getElementById('messages');
+            var messageTag = document.createElement("li");
+            messageTag.innerText = "Game started!!";
+            messageList.appendChild(messageTag);
+            
+
+            if(data.dealer == player.pos) {
+                messageTag = document.createElement("li");
+                messageTag.innerText = "You are dealer";
+                messageList.appendChild(messageTag);
+            } else if (data.SB == player.pos) {
+                messageTag = document.createElement("li");
+                messageTag.innerText = "You are SB";
+                messageList.appendChild(messageTag);
+            } else if (data.BB == player.pos) {
+                messageTag = document.createElement("li");
+                messageTag.innerText = "You are BB";
+                messageList.appendChild(messageTag);
+            }
+            socket.emit('getPlayerData');
+        });
+
+        socket.on('playerCount', (data) => {
+            var userCounter = document.getElementById('usercount');
+            userCounter.innerText = "Player count : " + data;
+        });
+
+        socket.on('updateData', (data, table) => {
+            player = JSON.parse(JSON.stringify(data)); // 응답받은 플레이어 데이터 깊은 복사
+            var userChip = document.getElementById('userchip');
+            userChip.innerText = "Chips : " + player.chip;
+            var board = document.getElementById('board');
+            board.innerText = "Board : " + table.board;
+            var pot = document.getElementById('pot');
+            pot.innerText = "Pot : " + table.pot;
+            var hand = document.getElementById('myhand');
+            hand.innerText = "My hand :" + player.hand;
+
+            if(player.pos == table.currentPlayer) { // 혹시나 내가 현재 턴일 경우
+                var messageList = document.getElementById('messages');
+                var messageTag = document.createElement("li");
+                messageTag.innerText = "Your turn! Please input your action";
+                messageList.appendChild(messageTag);
+                document.getElementById('control').style.display = "block";
+            }
+        });
+
+        socket.on('yourTurn', (data) => { // (deprecated 현재 안씀) 내 턴임을 알리는 응답
+            var messageList = document.getElementById('messages');
+            var messageTag = document.createElement("li");
+            messageTag.innerText = "Your turn! Please input your action";
+            messageList.appendChild(messageTag);
+            document.getElementById('control').style.display = "block";
+        });
+        
+
+
+        socket.on('wait', (msg) => {
+            var messageList = document.getElementById('messages');
+            var messageTag = document.createElement("li");
+            messageTag.innerText = msg + ", game is already started";
+            messageList.appendChild(messageTag);
+        });
+
+
+        // 메시지 수신시 HTML에 메시지 내용 작성
+        socket.on('message', (msg) => {
+            var messageList = document.getElementById('messages');
+            var messageTag = document.createElement("li");
+            messageTag.innerText = msg;
+            messageList.appendChild(messageTag);
+            socket.emit('getPlayerData');
+        });
+
+        socket.on('chatemit', (msg, username) => {
+            var chatarea = document.getElementById('chatarea');
+            chatarea.append("\n" + username + " : " + msg);
+        });
+
+
+
+        chatform.onsubmit = (e) => {
+            e.preventDefault();
+            var chatinput = document.getElementById('chatinput');
+
+            // socket.emit으로 서버에 신호를 전달
+            socket.emit('chatsend', chatinput.value, player.username);
+
+            chatinput.value = "";
+        };
+
+        betform.onsubmit = (e) => {
+            e.preventDefault();
+            var betinput = document.getElementById('betinput');
+
+            // socket.emit으로 서버에 신호를 전달
+            socket.emit('bet', betinput.value);
+
+            betinput.value = "";
+            document.getElementById('control').style.display = "none";
+        };
+
+        
+
+        checkform.onsubmit = (e) => {
+            e.preventDefault();
+
+            // socket.emit으로 서버에 신호를 전달
+            socket.emit('check', 'check');
+            document.getElementById('control').style.display = "none";
+        };
+
+        callform.onsubmit = (e) => {
+            e.preventDefault();
+
+            // socket.emit으로 서버에 신호를 전달
+            socket.emit('call', 'call');
+            document.getElementById('control').style.display = "none";
+        };
+
+        foldform.onsubmit = (e) => {
+            e.preventDefault();
+
+            // socket.emit으로 서버에 신호를 전달
+            socket.emit('fold', 'fold');
+            document.getElementById('control').style.display = "none";
+        };
+    </script>
+</body>
+</html>

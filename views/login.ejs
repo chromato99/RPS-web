@@ -1,0 +1,22 @@
+<html>
+
+<head>
+    <title>Login</title>
+    <style type="text/css">
+    h1 {
+        text-align: center;
+    }
+
+    </style>
+</head>
+
+<body>
+    <h1><%= message %> </h1>
+    <a href="/signup">SignUp</a>
+    <form action='/login' method='post'>
+        <input type='text' name='username' placeholder='username'>
+        <input type='password' name='password' placeholder='password'>
+        <input type='submit'>
+    </form>
+</body>
+</html>
