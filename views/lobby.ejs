@@ -11,12 +11,13 @@
 </head>
 <body>
     <div style="float: left; width: 50%;">
+        <a href="/logout">Logout</a>
         <ul id="roomlist" type="none">
             
         </ul>
     </div>
     <div style="float: left;">
-        <textarea id="chatarea" style="width: 400px; height: 600px;"></textarea>
+        <textarea id="chatarea" onfocus="javascript:blur();" style="width: 400px; height: 600px; cursor: default;"></textarea>
         <form id="chatform">
             <input id="chatinput" autocomplete="off" type="text">
             <button type="submit">Send</button>
@@ -26,6 +27,27 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var inputname = "<%= username %>";
+        var socket = io('/lobby');
+        socket.emit('lobby:newplayer', inputname);
+
+        var chatform = document.getElementById('chatform');
+
+        socket.on('lobby:chatemit', (msg, username) => {
+            var chatarea = document.getElementById('chatarea');
+            chatarea.append("\n" + username + " : " + msg);
+        });
+
+
+
+        chatform.onsubmit = (e) => {
+            e.preventDefault();
+            var chatinput = document.getElementById('chatinput');
+
+            // socket.emit으로 서버에 신호를 전달
+            socket.emit('lobby:chatsend', chatinput.value, inputname);
+
+            chatinput.value = "";
+        };
     </script>
 </body>
 </html>

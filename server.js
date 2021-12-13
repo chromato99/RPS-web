@@ -9,7 +9,7 @@ let MySQLStore = require('express-mysql-session')(session);
 let flash = require('connect-flash');
 let compression = require('compression');
 let crypto = require('crypto');
-let passport = require('passport'); // https://strongstar.tistory.com/42
+let passport = require('passport');
 let LocalStrategy = require('passport-local').Strategy;
 let ejs = require('ejs');
 let mysql = require('mysql');
@@ -19,6 +19,7 @@ let card = require('./src/card');
 let Table = require('./src/table');
 const db_config = require('./src/db-config');
 let bodyParser = require('body-parser');
+const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
 
 let table = new Table();
 
@@ -143,65 +144,92 @@ app.post('/login', // 로그인 요청이 들어왔을때
     })
 );
 
-io.on('connection', (socket) => {   //연결이 들어오면 실행되는 이벤트
-    // socket 변수에는 실행 시점에 연결한 상대와 연결된 소켓의 객체가 들어있다.
-    socket.data.player = {
-        username: '',
-        chip: 1000,
-        hand: new Array(), // 현재 패
-        currentBet: 0,  // 현재 라운드에서 얼마 베팅 했는지
-        folded: false,
-        allIn: false,
-        status: false, // 현재 라운드에서 행동 했는지 확인
-        pos: 0 // table.players 배열에서의 위치
+let lobbyIO = io.of('/lobby');
+
+lobbyIO.use(wrap(session({ secret: "!@#$%^&*", store: new MySQLStore(db_config), resave: false, saveUninitialized: false })));
+lobbyIO.use(wrap(passport.initialize()));
+lobbyIO.use(wrap(passport.session()));
+
+lobbyIO.use((socket, next) => {
+    if (socket.request.user) {
+        console.log("Authorized", socket.request.user.username);
+        next();
+    } else {
+        next(new Error("unauthorized"))
     }
-    table.players.push(socket.data.player);
-    socket.data.player.pos = table.players.indexOf(socket.data.player);
-    
-    socket.on('newplayer',(msg) => { // 새로운 플레이어 입장
-        socket.data.player.username = msg;
-        socket.emit('setStatus', {playerCount: io.engine.clientsCount,player: socket.data.player}); // 새로운 플레이어 정보 설정
-        
-        if(io.engine.clientsCount > 1) { // 3명 이상 입장시 자동 게임 시작
-            console.log('Start Game!');
-            table.startGame(); // 게임 시작
-            console.log(table);
-            io.emit('startGame', {currentPlayer: table.currentPlayer, dealer: table.dealer, SB: table.SB, BB: table.BB});
-        }
+});
+
+lobbyIO.on('connection', (socket) => {
+    socket.on('lobby:newplayer',(msg) => { // 새로운 플레이어 입장
+        console.log('lobbyIO : ', msg);
+        lobbyIO.emit('lobby:chatemit', 'Joined Lobby!!', socket.request.user.username);
     });
 
-    socket.on('getPlayerData', (msg) => { // 각 연결된 소켓들이 데이터 전송을 받기 위한 요청
-        //console.log(socket.data.player);
-        socket.emit('updateData', socket.data.player, {board: table.board, currentPlayer: table.currentPlayer, pot: table.pot, round: table.round});
-    });
-
-    socket.on('chatsend', (msg, username) => {
-        io.emit('chatemit', msg, username);
-    });
-
-    socket.on('bet', (msg) => {
-        console.log(socket.data.player);
-        table.bet(socket.data.player, msg);
-        if(socket.data.player.allIn == true) { // 플레이어가 올인 했을시
-            io.emit('message', socket.data.player.username + " All In!!!");
-        } else {
-            io.emit('message', socket.data.player.username + " bet " + msg);
-        }
-    });
-    socket.on('check', (msg) => {
-        table.call(socket.data.player);
-        //table.check(socket.data.player);
-        io.emit('message', socket.data.player.username + " check");
-    });
-    socket.on('call', (msg) => {
-        table.call(socket.data.player);
-        io.emit('message', socket.data.player.username + " call");
-    });
-    socket.on('fold', (msg) => {
-        table.fold(socket.data.player);
-        io.emit('message', socket.data.player.username + " fold");
+    socket.on('lobby:chatsend', (msg, username) => {
+        console.log('lobbyIO(' + socket.request.user.username + ') : ' + msg);
+        lobbyIO.emit('lobby:chatemit', msg, socket.request.user.username);
     });
 });
+
+// io.on('connection', (socket) => {   //연결이 들어오면 실행되는 이벤트
+//     // socket 변수에는 실행 시점에 연결한 상대와 연결된 소켓의 객체가 들어있다.
+//     socket.data.player = {
+//         username: '',
+//         chip: 1000,
+//         hand: new Array(), // 현재 패
+//         currentBet: 0,  // 현재 라운드에서 얼마 베팅 했는지
+//         folded: false,
+//         allIn: false,
+//         status: false, // 현재 라운드에서 행동 했는지 확인
+//         pos: 0 // table.players 배열에서의 위치
+//     }
+//     table.players.push(socket.data.player);
+//     socket.data.player.pos = table.players.indexOf(socket.data.player);
+    
+//     socket.on('newplayer',(msg) => { // 새로운 플레이어 입장
+//         socket.data.player.username = msg;
+//         socket.emit('setStatus', {playerCount: io.engine.clientsCount,player: socket.data.player}); // 새로운 플레이어 정보 설정
+        
+//         if(io.engine.clientsCount > 1) { // 3명 이상 입장시 자동 게임 시작
+//             console.log('Start Game!');
+//             table.startGame(); // 게임 시작
+//             console.log(table);
+//             io.emit('startGame', {currentPlayer: table.currentPlayer, dealer: table.dealer, SB: table.SB, BB: table.BB});
+//         }
+//     });
+
+//     socket.on('getPlayerData', (msg) => { // 각 연결된 소켓들이 데이터 전송을 받기 위한 요청
+//         //console.log(socket.data.player);
+//         socket.emit('updateData', socket.data.player, {board: table.board, currentPlayer: table.currentPlayer, pot: table.pot, round: table.round});
+//     });
+
+//     socket.on('chatsend', (msg, username) => {
+//         io.emit('chatemit', msg, username);
+//     });
+
+//     socket.on('bet', (msg) => {
+//         console.log(socket.data.player);
+//         table.bet(socket.data.player, msg);
+//         if(socket.data.player.allIn == true) { // 플레이어가 올인 했을시
+//             io.emit('message', socket.data.player.username + " All In!!!");
+//         } else {
+//             io.emit('message', socket.data.player.username + " bet " + msg);
+//         }
+//     });
+//     socket.on('check', (msg) => {
+//         table.call(socket.data.player);
+//         //table.check(socket.data.player);
+//         io.emit('message', socket.data.player.username + " check");
+//     });
+//     socket.on('call', (msg) => {
+//         table.call(socket.data.player);
+//         io.emit('message', socket.data.player.username + " call");
+//     });
+//     socket.on('fold', (msg) => {
+//         table.fold(socket.data.player);
+//         io.emit('message', socket.data.player.username + " fold");
+//     });
+// });
 
 server.listen(port, function() {
   console.log(`Listening on http://localhost:${port}/`);
