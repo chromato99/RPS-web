@@ -21,7 +21,17 @@
             float: left;
             box-sizing: content-box;
             text-align: center;
-            border-bottom: 1cm;
+            border-bottom-style: solid;
+             border-bottom-width: 3px;
+             border-bottom-color: rgb(210, 156, 226);
+        }
+        div.tp{
+            margin: 0px;
+            width: 100%;
+            height: 15%;
+            float: left;
+            box-sizing: content-box;
+            text-align: center;
         }
 
         div.left {
@@ -74,10 +84,7 @@
         function test() {
             var p1 = document.getElementById('password').value;
             var p2 = document.getElementById('re-password').value;
-            if (p1.length < 6) {
-                alert('입력한 글자가 6글자 이상이어야 합니다.');
-                return false;
-            }
+  
 
             if (p1 != p2) {
                 alert("비밀번호불일치");
@@ -122,20 +129,21 @@
         <div class="center">
 
             <form action='/signup' method='post'>
-                <div class="top">
+                <div class="tp">
 
                 </div>
                 <div class="centre">
 
-                    <h4>ID: <input type='text' name='username' placeholder='example' style="float:right;"></h4>
-                    <h4>비밀번호: <input type='password' name='password' id="password" placeholder='password' style="float:right;"></h4>
+                    <h4>ID: <input type='text' name='username' placeholder='example' style="float:right;" required></h4>
+                    <h4>비밀번호: <input type='password' name='password' id="password" placeholder='password' style="float:right;" pattern=".{6,}" required></h4>
                     <p>*비밀번호는 6자리 이상이어야 합니다*</p>
-                    <h4>비밀번호 확인: <input type='password' name='re-password' id='re-password' placeholder='password' style="float: right;"></h4>
-                    <h4>이메일: <input type='email' name='email' id='re-password' placeholder='example@gachon.ac.kr'style="float:right;"></h4><p></p>
-                    <h4>닉네임: <input type='text' name='nickname' placeholder='nickname'style="float:right;"></h4>
+                    <h4>비밀번호 확인: <input type='password' name='re-password' id='re-password' placeholder='password' style="float: right;" required></h4>
+                    
+                    <h4>이메일: <input type='email' name='email' id='re-password' placeholder='example@gachon.ac.kr'style="float:right;" required></h4><p></p>
+                    <h4>닉네임: <input type='text' name='nickname' placeholder='nickname'style="float:right;" required></h4>
                     <input type='submit' onclick="test()" value="Sign Up">
             </form>
-            <p><a href="/login">이미 계정이 있으신가요??</a>
+            <p><a href="/login"><b>이미 계정이 있으신가요??</b></a>
 
         </div>
     </div>
