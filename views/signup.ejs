@@ -3,40 +3,146 @@
 <head>
     <title>Sign Up</title>
     <style type="text/css">
-    h1 {
-        text-align: center;
-    }
+        h1 {
+            text-align: center;
+        }
 
+        div {
+            margin: 0px;
+            padding: 0;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        div.top {
+            margin: 0px;
+            width: 100%;
+            height: 15%;
+            float: left;
+            box-sizing: content-box;
+            text-align: center;
+        }
+
+        div.left {
+            margin: 0px;
+            width: 30%;
+            height: 85%;
+            float: left;
+            text-align: center;
+        }
+
+
+        div.center {
+            margin: 0px;
+            width: 30%;
+            height: 85%;
+            float: right;
+            text-align: center;
+        }
+
+        div.right {
+            margin: 0px;
+            width: 40%;
+            height: 85%;
+            float: right;
+
+        }
+
+        div.centre {
+            margin: 0px;
+            width: 100%;
+            height: 85%;
+            float: left;
+            text-align: center;
+        }
+
+        a {
+            text-decoration-line: none;
+            color: rgb(11, 53, 240);
+            font-size: medium;
+        }
+
+        p {
+            font-size: 10;
+            color: rgb(172, 18, 18);
+        }
     </style>
 
     <script>
         function test() {
             var p1 = document.getElementById('password').value;
             var p2 = document.getElementById('re-password').value;
-            if(p1.length < 6) {
-                    alert('입력한 글자가 6글자 이상이어야 합니다.');
-                    return false;
-                }
-                
-                if( p1 != p2 ) {
-                    alert("비밀번호불일치");
-                    return false;
-                } else{
-                    alert("비밀번호가 일치합니다");
-                    return true;
-                }
+            if (p1.length < 6) {
+                alert('입력한 글자가 6글자 이상이어야 합니다.');
+                return false;
+            }
+
+            if (p1 != p2) {
+                alert("비밀번호불일치");
+                return false;
+            } else {
+                alert("비밀번호가 일치합니다");
+                return true;
+            }
         }
     </script>
 </head>
 
 <body>
-    <h1><%= message %> </h1>
-    <a href="/login">Login</a>
-    <form action='/signup' method='post'>
-        <input type='text' name='username' placeholder='username'>
-        <input type='password' name='password' id="password" placeholder='password'>
-        <input type='password' name='re-password' id='re-password' placeholder='re-password'>
-        <input type='submit' onclick="test()" value="Sign Up">
-    </form>
+
+    <div>
+        <div class="top">
+
+           
+            <div class="left">
+
+            </div>
+            <div class="right">
+    
+            </div>
+    
+            <div class="center">
+                <h1>
+                    <%= message %>
+                </h1>
+                   
+    
+            </div>
+        </div>
+
+        <div class="left">
+
+        </div>
+        <div class="right">
+
+        </div>
+
+        <div class="center">
+
+            <form action='/signup' method='post'>
+                <div class="top">
+
+                </div>
+                <div class="centre">
+
+                    <input type='text' name='username' placeholder='username'>
+                    <p><p>
+                    <input type='password' name='password' id="password" placeholder='password'>
+                    <p>*비밀번호는 6자리 이상이어야 합니다*</p>
+                    <p></p>
+                    <input type='password' name='re-password' id='re-password' placeholder='re-password'>
+                    <p></p>
+                    <input type='submit' onclick="test()" value="Sign Up">
+            </form>
+            <p><a href="/login">이미 계정이 있으신가요??</a>
+
+        </div>
+    </div>
+    </div>
+    </div>
+
+
+
 </body>
+
 </html>
