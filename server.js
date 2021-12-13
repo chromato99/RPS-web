@@ -21,7 +21,7 @@ const db_config = require('./src/db-config');
 let bodyParser = require('body-parser');
 const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
 
-let table = new Table();
+let tableList = new Array();
 
 
 app.set('view engine', 'ejs'); // 렌더링 엔진 모드를 ejs로 설정
@@ -66,6 +66,7 @@ passport.use(new LocalStrategy(
 passport.serializeUser(function(user, done) {
     done(null, user.username);
 });
+
 passport.deserializeUser(function(username, done) {
     db.query('SELECT * FROM users WHERE username=?', [username], function(err, results){
     if(err)
@@ -93,13 +94,13 @@ app.get('/login', (req, res) => {
     }
 });
 
-app.get('/lobby', (req, res) => {
-    if(!req.user) {
-        res.redirect('/login');
-    } else {
-        res.render('lobby', {username: req.user.username});
-    }
-});
+app.post('/login', // 로그인 요청이 들어왔을때
+    passport.authenticate('local', {
+        successRedirect: '/lobby',
+        failureRedirect: '/login',
+        failureFlash: true
+    })
+);
 
 app.get('/logout', (req, res) => {
     req.logout();
@@ -131,18 +132,53 @@ app.post('/signup', (req, res) => {
                         res.redirect('/login');
                 });
             });
-            
         }
     });
 });
 
-app.post('/login', // 로그인 요청이 들어왔을때
-    passport.authenticate('local', {
-        successRedirect: '/lobby',
-        failureRedirect: '/login',
-        failureFlash: true
-    })
-);
+app.get('/lobby', (req, res) => {
+    if(!req.user) {
+        res.redirect('/login');
+    } else {
+        let list = new Array();
+        tableList.forEach((elem) => {
+            list.push(elem.name);
+        });
+        res.render('lobby', {username: req.user.username, list: list});
+    }
+});
+
+app.get('/newtable', (req, res) => {
+    if(!req.user) {
+        res.redirect('/login');
+    } else {
+        res.render('newTable');
+    }
+});
+
+app.post('/newtable', (req, res) => {
+    if(!req.user) {
+        res.redirect('/login');
+    } else {
+        tableList.forEach((elem) => {
+            if(elem.name == req.body.tablename) {
+                res.redirect('/newtable');
+            }
+        });
+        let table = new Table();
+        tableList.push(table);
+        
+        res.redirect('/game/' + req.body.tablename);
+    }
+});
+
+app.get('/game/:roomName', (req, res) => {
+    if(!req.user) {
+        res.redirect('/login');
+    } else {
+        res.render('game', {username: req.user.username});
+    }
+});
 
 let lobbyIO = io.of('/lobby');
 
@@ -171,65 +207,70 @@ lobbyIO.on('connection', (socket) => {
     });
 });
 
-// io.on('connection', (socket) => {   //연결이 들어오면 실행되는 이벤트
-//     // socket 변수에는 실행 시점에 연결한 상대와 연결된 소켓의 객체가 들어있다.
-//     socket.data.player = {
-//         username: '',
-//         chip: 1000,
-//         hand: new Array(), // 현재 패
-//         currentBet: 0,  // 현재 라운드에서 얼마 베팅 했는지
-//         folded: false,
-//         allIn: false,
-//         status: false, // 현재 라운드에서 행동 했는지 확인
-//         pos: 0 // table.players 배열에서의 위치
-//     }
-//     table.players.push(socket.data.player);
-//     socket.data.player.pos = table.players.indexOf(socket.data.player);
+let gameIO = io.of('/game');
+
+gameIO.use(wrap(session({ secret: "!@#$%^&*", store: new MySQLStore(db_config), resave: false, saveUninitialized: false })));
+gameIO.use(wrap(passport.initialize()));
+gameIO.use(wrap(passport.session()));
+
+gameIO.on('connection', (socket) => {   //연결이 들어오면 실행되는 이벤트
+    // socket 변수에는 실행 시점에 연결한 상대와 연결된 소켓의 객체가 들어있다.
+    socket.data.player = {
+        username: socket.request.user.username,
+        chip: 1000,
+        hand: new Array(), // 현재 패
+        currentBet: 0,  // 현재 라운드에서 얼마 베팅 했는지
+        folded: false,
+        allIn: false,
+        status: false, // 현재 라운드에서 행동 했는지 확인
+        pos: 0 // table.players 배열에서의 위치
+    }
+    table.players.push(socket.data.player);
+    socket.data.player.pos = table.players.indexOf(socket.data.player);
     
-//     socket.on('newplayer',(msg) => { // 새로운 플레이어 입장
-//         socket.data.player.username = msg;
-//         socket.emit('setStatus', {playerCount: io.engine.clientsCount,player: socket.data.player}); // 새로운 플레이어 정보 설정
+    socket.on('newplayer',(msg) => { // 새로운 플레이어 입장
+        socket.emit('setStatus', {playerCount: gameIO.engine.clientsCount,player: socket.data.player}); // 새로운 플레이어 정보 설정
         
-//         if(io.engine.clientsCount > 1) { // 3명 이상 입장시 자동 게임 시작
-//             console.log('Start Game!');
-//             table.startGame(); // 게임 시작
-//             console.log(table);
-//             io.emit('startGame', {currentPlayer: table.currentPlayer, dealer: table.dealer, SB: table.SB, BB: table.BB});
-//         }
-//     });
+        if(gameIO.engine.clientsCount > 1) { // 3명 이상 입장시 자동 게임 시작
+            console.log('Start Game!');
+            table.startGame(); // 게임 시작
+            console.log(table);
+            gameIO.emit('startGame', {currentPlayer: table.currentPlayer, dealer: table.dealer, SB: table.SB, BB: table.BB});
+        }
+    });
 
-//     socket.on('getPlayerData', (msg) => { // 각 연결된 소켓들이 데이터 전송을 받기 위한 요청
-//         //console.log(socket.data.player);
-//         socket.emit('updateData', socket.data.player, {board: table.board, currentPlayer: table.currentPlayer, pot: table.pot, round: table.round});
-//     });
+    socket.on('getPlayerData', (msg) => { // 각 연결된 소켓들이 데이터 전송을 받기 위한 요청
+        //console.log(socket.data.player);
+        socket.emit('updateData', socket.data.player, {board: table.board, currentPlayer: table.currentPlayer, pot: table.pot, round: table.round});
+    });
 
-//     socket.on('chatsend', (msg, username) => {
-//         io.emit('chatemit', msg, username);
-//     });
+    socket.on('chatsend', (msg, username) => {
+        gameIO.emit('chatemit', msg, username);
+    });
 
-//     socket.on('bet', (msg) => {
-//         console.log(socket.data.player);
-//         table.bet(socket.data.player, msg);
-//         if(socket.data.player.allIn == true) { // 플레이어가 올인 했을시
-//             io.emit('message', socket.data.player.username + " All In!!!");
-//         } else {
-//             io.emit('message', socket.data.player.username + " bet " + msg);
-//         }
-//     });
-//     socket.on('check', (msg) => {
-//         table.call(socket.data.player);
-//         //table.check(socket.data.player);
-//         io.emit('message', socket.data.player.username + " check");
-//     });
-//     socket.on('call', (msg) => {
-//         table.call(socket.data.player);
-//         io.emit('message', socket.data.player.username + " call");
-//     });
-//     socket.on('fold', (msg) => {
-//         table.fold(socket.data.player);
-//         io.emit('message', socket.data.player.username + " fold");
-//     });
-// });
+    socket.on('bet', (msg) => {
+        console.log(socket.data.player);
+        table.bet(socket.data.player, msg);
+        if(socket.data.player.allIn == true) { // 플레이어가 올인 했을시
+            gameIO.emit('message', socket.data.player.username + " All In!!!");
+        } else {
+            gameIO.emit('message', socket.data.player.username + " bet " + msg);
+        }
+    });
+    socket.on('check', (msg) => {
+        table.call(socket.data.player);
+        //table.check(socket.data.player);
+        gameIO.emit('message', socket.data.player.username + " check");
+    });
+    socket.on('call', (msg) => {
+        table.call(socket.data.player);
+        gameIO.emit('message', socket.data.player.username + " call");
+    });
+    socket.on('fold', (msg) => {
+        table.fold(socket.data.player);
+        gameIO.emit('message', socket.data.player.username + " fold");
+    });
+});
 
 server.listen(port, function() {
   console.log(`Listening on http://localhost:${port}/`);

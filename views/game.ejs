@@ -49,8 +49,8 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        var inputname = prompt("Enter username", ""); // 유저 이름 입력 받기
-        var socket = io();
+        var inputname = "<%= username %>"; // 유저 이름 입력 받기
+        var socket = io('/game');
         socket.emit('newplayer', inputname);
         var player = {};
 

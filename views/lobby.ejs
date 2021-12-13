@@ -12,8 +12,11 @@
 <body>
     <div style="float: left; width: 50%;">
         <a href="/logout">Logout</a>
+        <a href="/newtable">Make New Room</a>
         <ul id="roomlist" type="none">
-            
+            <% for(let i = 0; i < list.length; i++) { %> 
+                <li class = 'source' id = <%= i %> ><a href="/game/<%= list[i].name %>"><%= list[i].name %> </a></li>
+            <% } %> 
         </ul>
     </div>
     <div style="float: left;">

@@ -1,6 +1,7 @@
 var card = require('./card');
 
 module.exports = function() {
+    this.name = '';
     this.board = new Array(); // 현재 테이블에 공개된 카드
     this.pot = 0;
     this.betting = 0; // 마지막으로 베팅된 금액
