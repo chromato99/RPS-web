@@ -3,6 +3,7 @@
 <head>
     <title>Sign Up</title>
     <style type="text/css">
+
         h1 {
             text-align: center;
         }
@@ -22,10 +23,11 @@
             box-sizing: content-box;
             text-align: center;
             border-bottom-style: solid;
-             border-bottom-width: 3px;
-             border-bottom-color: rgb(210, 156, 226);
+            border-bottom-width: 3px;
+            border-bottom-color: rgb(210, 156, 226);
         }
-        div.tp{
+
+        div.tp {
             margin: 0px;
             width: 100%;
             height: 15%;
@@ -45,7 +47,7 @@
 
         div.center {
             margin: 0px;
-            width: 30%;
+            width: 40%;
             height: 85%;
             float: right;
             text-align: center;
@@ -53,7 +55,7 @@
 
         div.right {
             margin: 0px;
-            width: 40%;
+            width: 30%;
             height: 85%;
             float: right;
 
@@ -64,7 +66,7 @@
             width: 100%;
             height: 85%;
             float: left;
-            text-align: center;
+
         }
 
         a {
@@ -78,20 +80,28 @@
             color: rgb(172, 18, 18);
         }
 
+        td {
+            text-align: center;
+        }
     </style>
 
     <script>
-        function test() {
-            var p1 = document.getElementById('password').value;
-            var p2 = document.getElementById('re-password').value;
-  
+        function check_pw() {
 
-            if (p1 != p2) {
-                alert("비밀번호불일치");
-                return false;
-            } else {
-                alert("비밀번호가 일치합니다");
-                return true;
+            var pw = document.getElementById('password').value;
+            var SC = ["!", "@", "#", "$", "%"];
+            var check_SC = 0;
+
+
+            if (document.getElementById('password').value != '' && document.getElementById('re-password').value != '') {
+                if (document.getElementById('password').value == document.getElementById('re-password').value) {
+                    document.getElementById('check').innerHTML = '비밀번호가 일치합니다.'
+                    document.getElementById('check').style.color = 'blue';
+                }
+                else {
+                    document.getElementById('check').innerHTML = '비밀번호가 일치하지 않습니다.';
+                    document.getElementById('check').style.color = 'red';
+                }
             }
         }
     </script>
@@ -102,20 +112,20 @@
     <div>
         <div class="top">
 
-           
+
             <div class="left">
 
             </div>
             <div class="right">
-    
+
             </div>
-    
+
             <div class="center">
                 <h1>
                     Welcome to the game of ___
                 </h1>
-                   
-    
+
+
             </div>
         </div>
 
@@ -133,24 +143,49 @@
 
                 </div>
                 <div class="centre">
+                    <table style=" margin-left:auto; margin-right:auto;">
+                        <tr>
 
-                    <h4>ID: <input type='text' name='username' placeholder='example' style="float:right;" required></h4>
-                    <h4>비밀번호: <input type='password' name='password' id="password" placeholder='password' style="float:right;" pattern=".{6,}" required></h4>
-                    <p>*비밀번호는 6자리 이상이어야 합니다*</p>
-                    <h4>비밀번호 확인: <input type='password' name='re-password' id='re-password' placeholder='password' style="float: right;" required></h4>
-                    
-                    <h4>이메일: <input type='email' name='email' id='re-password' placeholder='example@gachon.ac.kr'style="float:right;" required></h4><p></p>
-                    <h4>닉네임: <input type='text' name='nickname' placeholder='nickname'style="float:right;" required></h4>
+                            <td width="50%"><b>ID</b></td>
+                            <td><input type='text' name='username' placeholder='example' style="float:right;" required>
+                            </td>
+                        </tr>
+                        <tr>
+
+                            <td width="50%"><b>비밀번호</b></td>
+                            <td><input type='password' name='password' id="password" placeholder='password'
+                                    style="float:right;" pattern=".{6,}" required onchange="check_pw()"></td>
+                        </tr>
+                        <tr>
+
+                            <td width="50%"><b>비밀번호 확인</b></td>
+                            <td><input type='password' name='re-password' id='re-password' placeholder='password'
+                                    style="float: right;" onchange="check_pw()">
+                                &nbsp;<p><span id="check"></span>
+                            </td>
+                        </tr>
+                        <tr>
+
+                            <td width="50%"><b>이메일</b></td>
+                            <td> <input type='email' name='email' id='email' placeholder='example@gachon.ac.kr'
+                                    style="float:right;" required></td>
+                        </tr>
+                        <tr>
+
+                            <td width="50%"><b>닉네임</b></td>
+                            <td><input type='text' name='nickname' placeholder='nickname' style="float:right;" required>
+                            </td>
+                        </tr>
+                    </table>
+                    <br>
                     <input type='submit' onclick="test()" value="Sign Up">
-            </form>
-            <p><a href="/login"><b>이미 계정이 있으신가요??</b></a>
+                    <p>
+                    <p><a href="/login"><b>이미 계정이 있으신가요??</b></a>
 
+                </div>
         </div>
     </div>
     </div>
-    </div>
-
-
 
 </body>
 
