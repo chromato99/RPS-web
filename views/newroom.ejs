@@ -5,7 +5,7 @@
     <style type="text/css">
     h1 {
         text-align: center;
-        
+        /* align the New Room to the center of the page */
     }
 
     </style>
@@ -24,10 +24,12 @@
     <img src="https://t4.ftcdn.net/jpg/00/86/16/21/240_F_86162112_uOlc958HLu91DMpNj7YxNgHdIhD5NQ78.jpg"
     style="width: 35px;"> &nbsp;
     <a href="/lobby" > <font size="10"  color="black"> Back</a> </font>
+    <!--when you press back button, you go back to the lobby page -->
 
     <br><br><br>
 
-    <form action='/newroom' method='post'>
+    <form action='/newroom' method='post'> 
+        <!-- align 3 images to the leftside -->
         &emsp;
         <img src="https://t4.ftcdn.net/jpg/01/37/39/61/240_F_137396146_YdMApcVRhlbLZXvzzxRnlGImQbJ6zQuO.jpg" style="height:300px;width: 250px;">
         &emsp;<img src="https://t4.ftcdn.net/jpg/01/37/39/61/240_F_137396133_S49HfXiYBw32t0pgTG3tbP11H6Qq172J.jpg" style="height:300px;width: 250px;">
@@ -38,6 +40,7 @@
         <label for="numberOfPlayers"> <font size="12" style="font-family:Arial, Helvetica, sans-serif;" color="black">
             Choose a number of max player :</label> </font>
 
+            <!-- you can select the number of maximum player (at least 2) -->
             &emsp;&emsp;         
         <select name="max" id="numberOfPlayers" style="width: 70px; height: 48px; font-size: 25px;">
             <option value="2">2</option>
@@ -50,9 +53,11 @@
         </select>
 
         
+        <!-- enter the room name -->
         <input type='text' size='100' name='roomname' placeholder='Room Name'  style="height: 50px;width: 230px; font-size: 20px;">
         <!-- <input type='password' name='password' placeholder='password'> -->
      
+        <!-- press 'submit' button -->
         <input type='submit' style="height: 50px;width: 50px; font-size: 15px;"> &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
 
         
