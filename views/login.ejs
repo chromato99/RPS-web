@@ -5,14 +5,14 @@
     <style type="text/css">
         h1 {
             text-align: center;
-            /*input your id and password 문장 가운데로 정렬 */
             font-size: 50px;
+            /*input your id and password align the text to the center */
         }
     </style>
 </head>
 
 <body bgcolor="#DFEBF1">
-    <!-- 배경색 -->
+    <!-- background color -->
     <br> <br> <br> <br> <br>
     <h1>
         <%= message %>
@@ -22,7 +22,7 @@
     &emsp;&emsp;&emsp;&emsp;
 
 
-    <!-- 이미지 세개 정렬 -->
+    <!-- array the 3 images -->
 
     &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
     &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
@@ -38,7 +38,7 @@
 
 
 
-    <!-- 누르면 sign up(회원가입 창)으로 이동 -->
+    <!-- if you press sign up button, move to the sign up page -->
     <div style="text-align: center;"> <br><br><br><br>
         <a href="/signup" style = "text-decoration-line: none;">
             <font size="6" color="blue"><b>Sign Up</b> <br><br>
@@ -49,13 +49,13 @@
     <div style="text-align: center;">
         <form action='/login' method='post'>
             <input type='text' name='username' placeholder='Username' style="height: 25px;width: 170px;">
-            <!-- username 입력 -->
+            <!-- enter username-->
 
             <input type='password' name='password' placeholder='Password' style="height: 25px;width: 170px;">
-            <!-- 비밀번호 입력 -->
+            <!-- enter password -->
 
             <input type='submit' style="height: 25px;width: 100px;">
-            <!-- 제출란  -->
+            <!-- submit' button -->
         </form>
     </div>
 

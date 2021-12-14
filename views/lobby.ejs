@@ -3,72 +3,239 @@
 <head>
     <title>Lobby</title>
     <style type="text/css">
-    h1 {
-        text-align: center;
-    }
-    .modal {
-        display: none; /* Hidden by default */
-        position: fixed; /* Stay in place */
-        z-index: 1; /* Sit on top */
-        left: 0;
-        top: 0;
-        width: 100%; /* Full width */
-        height: 100%; /* Full height */
-        overflow: auto; /* Enable scroll if needed */
-        background-color: rgb(0,0,0); /* Fallback color */
-        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-    }
+        h1 {
+            text-align: center;
+        }
 
-    /* Modal Content/Box */
-    .modal-content {
-        background-color: #fefefe;
-        margin: 15% auto; /* 15% from the top and centered */
-        padding: 20px;
-        border: 1px solid #888;
-        width: 50%; /* Could be more or less, depending on screen size */                          
-    }
-    /* The Close Button */
-    .close {
-        color: #aaa;
-        float: right;
-        font-size: 28px;
-        font-weight: bold;
-    }
-    .close:hover,
-    .close:focus {
-        color: black;
-        text-decoration: none;
-        cursor: pointer;
-    }
-    table, th, td {
-        border: 1px solid black;
-    }
+        .modal {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Stay in place */
+            z-index: 1;
+            /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            overflow: auto;
+            /* Enable scroll if needed */
+            background-color: rgb(0, 0, 0);
+            /* Fallback color */
+            background-color: rgba(0, 0, 0, 0.4);
+            /* Black w/ opacity */
+        }
 
+        /* Modal Content/Box */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%;
+            /* Could be more or less, depending on screen size */
+        }
+
+        /* The Close Button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        div.default {
+            margin: 0px;
+            margin-top: -8px;
+            margin-left: -7px;
+            padding: 0;
+            width: 99.9vw;
+            height: 99vh;
+            background-color: #DFEBF1;
+            min-width: 1500px;
+            min-height: 800px;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        table.roomlist {
+            border: 1px solid black;
+            text-align: center;
+            padding: 0px;
+        }
+
+        td {
+            border: 1px solid black;
+            text-align: center;
+            padding: 0px;
+        }
+
+        th {
+            border: 1px solid black;
+            text-align: center;
+            padding: 0px;
+        }
+
+
+        td.n {
+            text-align: center;
+            border: none;
+        }
+
+        th.n {
+            text-align: center;
+            border: none;
+        }
+
+        a.t {
+            text-decoration-line: none;
+            color: rgb(3, 3, 3);
+            font-size: 50px;
+        }
+
+        div.top {
+            margin: 0px;
+            width: 100%;
+            height: 15%;
+            float: left;
+            box-sizing: content-box;
+            text-align: center;
+            /* style for text */
+            border-bottom-style: solid;
+            border-bottom-width: 4px;
+            border-bottom-color: rgb(210, 156, 226);
+            text-shadow: 2px 2px 2px rgb(102, 97, 97);
+
+        }
+
+        div.left {
+            margin: 0px;
+            width: 45%;
+            height: 85%;
+            float: left;
+            text-align: center;
+
+        }
+
+        div.center {
+            margin: 0px;
+            width: 25%;
+            height: 85%;
+            float: right;
+            text-align: left;
+
+        }
+
+        div.right {
+            margin: 0px;
+            width: 30%;
+            height: 85%;
+            float: right;
+
+        }
+
+        div.cht {
+            margin: 0px;
+            width: 100%;
+            height: 90%;
+            float: right;
+
+
+        }
+
+        div.lgout {
+
+            margin: 0px;
+            width: 100%;
+            height: 10%;
+            float: right;
+            text-align: center;
+        }
+
+        a.room {
+            text-decoration-line: none;
+            color: rgb(223, 25, 52);
+            font-size: 20px;
+        }
     </style>
 </head>
+
 <body>
-    <h1><a href="/lobby">Welcome to Lobby</a></h1>
-    <div style="float: left; width: 50%;">
-        <a href="/logout">Logout</a>
-        <a href="/newroom">Make New Room</a>
-        <button onclick="socket.emit('lobby:reqRoomList');">Refresh</button>
-        <table id="roomlist" style="width: 800px;">
-            <th>Room Name</th>
-            <th>Max</th>
-            <th>Current</th>
-            <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
-        </table>
-    </div>
-    <div style="float: left;">
-        <div style="float: left;">
-            <textarea id="chatArea" onfocus="javascript:blur();" style="width: 400px; height: 600px; cursor: default;"></textarea>
-            <form id="chatForm">
-                <input id="chatInput" autocomplete="off" type="text">
-                <button type="submit">Send</button>
-            </form>
+    <div class="default">
+        <div class="top">
+            <h1><a class="t" href="/lobby">Welcome to Lobby</a></h1>
         </div>
-        <div style="float: left;">
-            <button onclick="socket.emit('lobby:reqUserList');">Refresh</button>
+        <div class="left">
+            <div class="lgout">
+                <table style="width: 200px; 
+
+                margin-right:auto;">
+                    <tr class="n">
+                        <th class="n">Create New Room</th>
+                        <th class="n"> <a href="/newroom"><img
+                                    src="https://cdn-icons.flaticon.com/png/512/3810/premium/3810870.png?token=exp=1639485304~hmac=4e69f6b0c99820e5b9d9893131b9bc79"
+                                    style="height: 20px;"></a><br></th>
+                    </tr>
+                    <tr class="n">
+                        <th class="n">Refresh Room List</th>
+                        <th class="n"> <button onclick="socket.emit('lobby:reqRoomList');"><img
+                                    src="https://cdn-icons.flaticon.com/png/512/1082/premium/1082454.png?token=exp=1639483157~hmac=8dc29e8b180ce24574a645eaff3137b8"
+                                    style="height: 20px;">
+
+                            </button></th>
+                    </tr>
+                </table>
+            </div>
+            <div class="cht">
+
+                <table id="roomlist" style="width: 700px;">
+                    <th>Room Name</th>
+                    <th>Max</th>
+                    <th>Current</th>
+                    <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+                </table>
+
+            </div>
+        </div>
+        <div class="right">
+            <div class="cht">
+                <textarea id="chatArea" onfocus="javascript:blur();"
+                    style="width: 99%; height: 600px; cursor: default; "></textarea>
+                <form id="chatForm">
+                    <input id="chatInput" autocomplete="off" type="text" style="width: 85%">
+                    <button type="submit">Send</button>
+                </form>
+            </div>
+            <div class="lgout">
+                <a href="/logout"><img src="https://icon-library.com/images/free-logout-icon/free-logout-icon-7.jpg"
+                        style="height: 50px;"></a>
+            </div>
+
+        </div>
+
+        <div class="center">
+            <table style="width: 200px; 
+
+                margin-right:auto;">
+
+                <tr class="n">
+                    <th class="n">Refresh User List</th>
+                    <th class="n"> <button onclick="socket.emit('lobby:reqUserList');"><img
+                                src="https://cdn-icons.flaticon.com/png/512/1082/premium/1082454.png?token=exp=1639483157~hmac=8dc29e8b180ce24574a645eaff3137b8"
+                                style="height: 20px;">
+
+                        </button></th>
+                </tr>
+            </table>
+
             <ul id="userlist">
             </ul>
         </div>
@@ -76,15 +243,15 @@
 
     <!-- The Modal -->
     <div id="myModal" class="modal">
-      <!-- Modal content -->
-      <div class="modal-content">
-        <span class="close">&times;</span>
-        <div id="userdata">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="userdata">
 
+            </div>
         </div>
-      </div>
     </div>
-
+    </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -97,21 +264,21 @@
         var whisperForm = document.getElementById('whisperForm');
 
         var modal = document.getElementById('myModal');
- 
+
         // Get the <span> element that closes the modal
         var modalspan = document.getElementsByClassName("close")[0];
- 
 
- 
+
+
         // When the user clicks on <span> (x), close the modal
-        modalspan.onclick = function() {
+        modalspan.onclick = function () {
             modal.style.display = "none";
             var userData = document.getElementById('userdata');
             userData.innerHTML = '';
         }
- 
+
         // When the user clicks anywhere outside of the modal, close it
-        window.onclick = function(event) {
+        window.onclick = function (event) {
             if (event.target == modal) {
                 modal.style.display = "none";
                 var userData = document.getElementById('userdata');
@@ -190,7 +357,7 @@
                 <p>Draw : ${data.draw}</p>
                 <p>Last Login : ${data.last_connection}</p>
             `;
-            if(data.username != inputname) {
+            if (data.username != inputname) {
                 userData.innerHTML += `<button onclick="whisper('${data.username}')">Whisper</button>`;
             }
         });
@@ -218,4 +385,5 @@
         };
     </script>
 </body>
+
 </html>
