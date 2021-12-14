@@ -372,16 +372,17 @@
                 <th>Current</th>
                 <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
             `;
-            console.log(data);
             data.forEach((elem) => {
-                roomList.innerHTML += '<tr>'
-                roomList.innerHTML += `
-                    <td>${elem.name}</td>
-                    <td>${elem.max_player_count}</td>
-                    <td>${elem.players.length}</td>
-                    <td><a href="/game/${elem.name}">Join</a></td>
-                `;
-                roomList.innerHTML += '</tr>';
+                if(!elem.started) {
+                    roomList.innerHTML += '<tr>'
+                    roomList.innerHTML += `
+                        <td>${elem.name}</td>
+                        <td>${elem.max_player_count}</td>
+                        <td>${elem.players.length}</td>
+                        <td><a href="/game/${elem.name}">Join</a></td>
+                    `;
+                    roomList.innerHTML += '</tr>';
+                }
             })
         });
 

@@ -38,37 +38,32 @@
             text-decoration: none;
             cursor: pointer;
         }
-        table, th, td {
+        table, th, td{
             border: 1px solid black;
+        }
+        td.status{
+            height: 100px;
+            width: 90px;
         }
     </style>
 </head>
 <body>
-    <button onclick="closeGame()" style="float: left;">Back</button>
-    <div style="float: left; width: 50%;">
+    <button onclick="closeGame()">Back</button>
+    <div style="float: left; width: 45%;">
         <div>
-            <table id="usertable" style="float: left; height: 600px; width: 800px;">
+            <table id="usertable" style="float: left; height: 600px; width: 100%;">
                 <tr>
                 <% for(let i = 0; i < room.max_player_count; i++) { %>
                     <% if(i == 4) { %> 
                     </tr><tr>
                     <% } %> 
-                    <td id="<%= i %> ">
-                        <table>
-                            <td>
-                            </td>
-                            <td>
-                            </td>
-                        </table>
+                    <td id="<%= i %>">
                     </td>
                 <% } %> 
                 </tr>
             </table>
-        </div>
-        <button id="readybtn" onclick="setReady()">ready</button>
-        <ul id="messages" type="none">
-            
-        </ul>
+        </div><br>
+        <button id="readybtn" onclick="setReady()" style="float: none; height: 100px; width: 200px;">ready</button>
     </div>
     <div style="float: left;">
         <textarea id="chatarea" style="width: 400px; height: 500px;"></textarea>
@@ -95,17 +90,17 @@
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        var username = "<%= username %>"; // 유저 이름 입력 받기
-        var roomname = "<%= roomname %>";
-        var socket = io('/game');
+        let username = "<%= username %>"; // 유저 이름 입력 받기
+        let roomname = "<%= roomname %>";
+        let socket = io('/game');
         socket.emit('newPlayer', roomname);
         socket.emit('reqRoomData');
 
-        var chatform = document.getElementById('chatform');
-        var modal = document.getElementById('myModal');
+        let chatform = document.getElementById('chatform');
+        let modal = document.getElementById('myModal');
 
         function showLobbyUserList() {
-            var userlist = document.getElementById('userlist');
+            let userlist = document.getElementById('userlist');
             if(document.getElementById('userlist').style.display == 'none') {
                 document.getElementById('userlist').style.display = "block";
                 socket.emit('reqLobbyUserList');
@@ -115,12 +110,13 @@
         }
 
         function closeGame() {
+            modal.style.display = 'none';
             socket.disconnect();
             window.location.href = '/lobby';
         }
 
         function invite(id) {
-            var button = document.getElementById(id);
+            let button = document.getElementById(id);
             button.innerHTML = 'Invited';
             button.disabled = true;
             socket.emit('reqInviteUser', id);
@@ -128,7 +124,7 @@
 
         function setReady() {
             let readybtn = document.getElementById('readybtn');
-            readybtn.disabled = true;
+            readybtn.style.display = 'none';
             socket.emit('ready');
         }
 
@@ -170,7 +166,7 @@
 
         socket.on('winloss', (players, winSelection) => {
             let insideModal = document.getElementById('insideModal');
-            modal.style.display = 'block';
+            
 
             let player;
             players.forEach((elem) => {
@@ -178,7 +174,7 @@
                     player = elem;
                 }
             });
-            if(elem.selection == winSelection) {
+            if(player.selection == winSelection) {
                 insideModal.innerHTML = `
                     <h2>You Win!!</h2>
                     <button onclick="closeGame()">Back To Lobby</button>
@@ -189,32 +185,30 @@
                     <button onclick="closeGame()">Back To Lobby</button>
                 `;
             }
+            modal.style.display = 'block';
         });
 
         // 메시지 수신시 HTML에 메시지 내용 작성
         socket.on('message', (msg) => {
-            var messageList = document.getElementById('messages');
-            var messageTag = document.createElement("li");
-            messageTag.innerText = msg;
-            messageList.appendChild(messageTag);
-            socket.emit('reqGameData');
+            let chatarea = document.getElementById('chatarea');
+            chatarea.append("\n" + msg);
         });
 
         socket.on('emitChat', (msg, username) => {
-            var chatarea = document.getElementById('chatarea');
+            let chatarea = document.getElementById('chatarea');
             chatarea.append("\n" + username + " : " + msg);
         });
 
         socket.on('resRoomData', (data) => {
             for(let i = 0; i < data.players.length; i++) {
-                let td = document.getElementById(i);
+                let td = document.getElementById(i.toString());
                 td.innerHTML = `
                     <table>
                         <tr>
-                            <td>${data.players[i].name}</td>
+                            <td class="status">${data.players[i].name}</td>
                         </tr>
                         <tr>
-                            <td>${data.players[i].status}</td>
+                            <td class="status">${data.players[i].status}</td>
                         </tr>
                     </table>
                 `;
@@ -222,7 +216,7 @@
         });
         
         socket.on('resLobbyUserList', (data) => {
-            var userList = document.getElementById('userlist');
+            let userList = document.getElementById('userlist');
             userList.innerHTML = '';
             data.forEach((elem) => {
                 userList.innerHTML += `
@@ -230,6 +224,19 @@
                 `;
             });
         });
+
+        socket.on('userDisconnected', (username) => {
+
+        });
+        chatform.onsubmit = (e) => {
+            e.preventDefault();
+            let chatinput = document.getElementById('chatinput');
+
+            // socket.emit으로 서버에 신호를 전달
+            socket.emit('sendChat', chatinput.value, username);
+
+            chatinput.value = "";
+        };
     </script>
 </body>
 </html>

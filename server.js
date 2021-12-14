@@ -1,7 +1,7 @@
 let express = require('express');
 
 let app = express();
-let port = 8000;
+let port = 80;
 
 let server = require('http').createServer(app);
 let session = require('express-session');
@@ -180,7 +180,8 @@ app.post('/newroom', (req, res) => {
             name: req.body.roomname,
             players: new Array(),
             max_player_count: req.body.max,
-            ready: 0
+            ready: 0,
+            started: false
         };
         roomList.push(room);
         
@@ -197,12 +198,12 @@ app.get('/game/:roomname', (req, res) => {
             if(req.params.roomname == elem.name) {
                 room = elem;
             }
-            if(elem.players.length == elem.max_player_count) {
+            if(elem.players.length == elem.max_player_count || elem.started) {
                 res.redirect('/lobby');
             }
         });
         if(!room) {
-            console.log("no such room : ", roomname, "| username : ",req.user.username);
+            console.log("no such room : ", req.params.roomname, "| username : ",req.user.username);
             res.redirect('/lobby');
         } else {
             res.render('RPSgame', {username: req.user.username, roomname: req.params.roomname, room: room});
@@ -234,9 +235,9 @@ lobbyIO.on('connection', (socket) => {
             if(socketList.size > 0) {
                 socketList.forEach((elem) => {
                     if(elem.request.user.username == destUsername) {
-                        console.log('lobby:emitChat', `(Whisper) : ` + message);
-                        lobbyIO.to(elem.id).emit('lobby:emitChat', `(Whisper) : ` + message, socket.request.user.username);
-                        lobbyIO.to(socket.id).emit('lobby:emitChat', `(Whisper) : ` + message, socket.request.user.username);
+                        //console.log('lobby:emitChat', `(Whisper) ` + message);
+                        lobbyIO.to(elem.id).emit('lobby:emitChat', `(Whisper) ` + message, socket.request.user.username);
+                        lobbyIO.to(socket.id).emit('lobby:emitChat', `(Whisper) ` + message, socket.request.user.username);
                     }
                 });
             }
@@ -325,6 +326,7 @@ gameIO.on('connection', (socket) => {   //연결이 들어오면 실행되는 �
     });
 
     socket.on('ready', () => {
+        console.log(socket.request.user.username, " ready");
         socket.data.room.players.forEach((elem) => {
             if(elem.name == socket.request.user.username) {
                 elem.ready = true;
@@ -332,15 +334,17 @@ gameIO.on('connection', (socket) => {   //연결이 들어오면 실행되는 �
             }
         });
         socket.data.room.ready++;
-        socket.emit('resRoomData', socket.data.room);
+        gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
         gameIO.to(socket.data.roomname).emit('message', socket.request.user.username + ' Ready');
         if(socket.data.room.players.length == socket.data.room.ready) {
             socket.data.room.ready = 0;
-            socket.emit('gameStarted');
+            socket.data.room.started = true;
+            gameIO.to(socket.data.roomname).emit('gameStarted');
         }
     });
     
     socket.on('setSelection', (selectionName, selection) => {
+        console.log(socket.request.user.username, " selected ", selectionName);
         socket.data.room.players.forEach((elem) => {
             if(elem.name == socket.request.user.username) {
                 elem.status = selectionName;
@@ -348,6 +352,7 @@ gameIO.on('connection', (socket) => {   //연결이 들어오면 실행되는 �
             }
         });
         socket.data.room.ready++;
+        gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
         gameIO.to(socket.data.roomname).emit('message', socket.request.user.username + ' Selected');
         if(socket.data.room.players.length == socket.data.room.ready) {
             socket.data.room.ready = 0;
@@ -380,7 +385,7 @@ gameIO.on('connection', (socket) => {   //연결이 들어오면 실행되는 �
             } else if(rock == 0) {
                 updateWinLoss(socket.data.room.players, 3);
                 gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
-                gameIO.to(socket.data.roomname).emit('winloss', socket.data.room.players,3);
+                gameIO.to(socket.data.roomname).emit('winloss', socket.data.room.players, 3);
             } else if(paper == 0) {
                 updateWinLoss(socket.data.room.players, 1);
                 gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
