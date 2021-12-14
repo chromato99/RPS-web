@@ -185,39 +185,67 @@
             border: 1px solid rgb(235, 135, 230);
             background-color: rgba(212, 209, 211, 0);
             color: rgb(58, 61, 219);
+            box-shadow: 1px 1px 1px black; 
             padding: 5px;
+        }
+        /* style of button when mouse is over it */
+        button:hover {
+            border-radius: 5px;
+            margin-right: -4px;
+            border: 1px solid rgb(235, 135, 230);
+            background-color: rgba(106, 190, 223, 0.479);
+            color: rgb(58, 61, 219);
+            padding: 5px;
+           
+
+        }
+        /* style of button when it is clicked */
+        button:active {
+            margin-left: 1%;
+            margin-bottom: 1%;
+            box-shadow: none;
+        }
+        
+        /* style for default link */
+        a {
+            text-decoration-line: none;
+            color: rgb(0, 22, 223);
         }
     </style>
 </head>
 
 <body>
+    <!-- the whole document -->
     <div class="default">
+        <!-- divide for the top of the document -->
         <div class="top">
             <h1><a class="t" href="/lobby">Welcome to Lobby</a></h1>
         </div>
+        <!-- divide for the left part of the document -->
         <div class="left">
+            <!-- divide again -->
             <div class="lgout">
-                <table style="width: 200px; 
-
-                margin-right:auto;">
+                <table style="width: 200px;  margin-right:auto;">
+                    <!-- table for link to making room, refreshing user data -->
                     <tr class="n">
+                        <!-- creating new room when user presses button -->
                         <th class="n">Create New Room</th>
-                        <th class="n"> <a href="/newroom"><img
-                                    src="https://cdn-icons.flaticon.com/png/512/3329/premium/3329465.png?token=exp=1639497727~hmac=84931e0d5c1001acfea3b7d9115d032d"
-                                    style="height: 20px;"></a><br></th>
+                        <th class="n"><button> <a href="/newroom"><img
+                                        src="https://cdn-icons.flaticon.com/png/512/3329/premium/3329465.png?token=exp=1639497727~hmac=84931e0d5c1001acfea3b7d9115d032d"
+                                        style="height: 20px;"></a><br></button></th>
                     </tr>
+                    <!-- refreshing list of room when user input data -->
                     <tr class="n">
                         <th class="n">Refresh Room List</th>
                         <th class="n"> <button onclick="socket.emit('lobby:reqRoomList');"><img
-                                    src="https://cdn-icons-png.flaticon.com/512/740/740819.png"
-                                    style="height: 20px;">
-
+                                    src="https://cdn-icons-png.flaticon.com/512/740/740819.png" style="height: 20px;">
                             </button></th>
                     </tr>
                 </table>
             </div>
+            <!-- divide again inside left division -->
             <div class="cht">
-
+                <!-- table containing list of room -->
                 <table id="roomlist" style="width: 700px;">
                     <th>Room Name</th>
                     <th>Max</th>
@@ -227,15 +255,20 @@
 
             </div>
         </div>
+        <!-- divide class for the right part -->
         <div class="right">
+            <!-- divide again inside right side -->
             <div class="cht">
+                <!-- text area for chatting with other users -->
                 <textarea id="chatArea" onfocus="javascript:blur();"
                     style="width: 99%; height: 600px; cursor: default; "></textarea>
+                    <!-- chatting input -->
                 <form id="chatForm">
                     <input id="chatInput" autocomplete="off" type="text" style="width: 87%">
                     <button type="submit">Send</button>
                 </form>
             </div>
+            <!-- divide for logging out -->
             <div class="lgout">
                 <a href="/logout"><img src="https://icon-library.com/images/free-logout-icon/free-logout-icon-7.jpg"
                         style="height: 50px;"></a>
@@ -243,14 +276,15 @@
 
         </div>
 
+        <!-- divide for the centeral part -->
         <div class="center">
             <table style="width: 200px; margin-right:auto;">
 
+                <!-- when button is clicked, user list is updated -->
                 <tr class="n">
                     <th class="n">Refresh User List</th>
                     <th class="n"> <button onclick="socket.emit('lobby:reqUserList');"><img
-                                src="https://cdn-icons-png.flaticon.com/512/740/740819.png"
-                                style="height: 20px;">
+                                src="https://cdn-icons-png.flaticon.com/512/740/740819.png" style="height: 20px;">
 
                         </button></th>
                 </tr>
