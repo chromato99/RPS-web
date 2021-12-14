@@ -3,7 +3,6 @@
 <head>
     <title>Sign Up</title>
     <style type="text/css">
-
         h1 {
             text-align: center;
         }
@@ -64,7 +63,15 @@
         div.centre {
             margin: 0px;
             width: 100%;
-            height: 85%;
+            height: 25%;
+            float: left;
+
+        }
+
+        div.btm {
+            margin: 0px;
+            width: 100%;
+            height: 60%;
             float: left;
 
         }
@@ -114,15 +121,15 @@
 
 
             <div class="left">
-
+                <img src="https://cdn-icons-png.flaticon.com/512/744/744118.png" style="height: 70px; float: right;">
             </div>
             <div class="right">
-
+                <img src="https://cdn-icons-png.flaticon.com/512/744/744119.png" style="height: 70px; float: left;">
             </div>
 
             <div class="center">
                 <h1>
-                    Welcome to the game of ___
+                    Welcome to the game of RPS!!
                 </h1>
 
 
@@ -146,9 +153,15 @@
                     <table style=" margin-left:auto; margin-right:auto;">
                         <tr>
 
-                            <td width="50%"><b>ID</b></td>
+                            <td width="50%"><b>ID(닉네임)</b></td>
                             <td><input type='text' name='username' placeholder='example' style="float:right;" required>
                             </td>
+                        </tr>
+                        <tr>
+
+                            <td width="50%"><b>이메일</b></td>
+                            <td> <input type='email' name='email' id='email' placeholder='example@gachon.ac.kr'
+                                    style="float:right;" required></td>
                         </tr>
                         <tr>
 
@@ -160,30 +173,22 @@
 
                             <td width="50%"><b>비밀번호 확인</b></td>
                             <td><input type='password' name='re-password' id='re-password' placeholder='password'
-                                    style="float: right;" onchange="check_pw()">
+                                    style="float: right;" onchange="check_pw()" required>
                                 &nbsp;<p><span id="check"></span>
                             </td>
                         </tr>
-                        <tr>
 
-                            <td width="50%"><b>이메일</b></td>
-                            <td> <input type='email' name='email' id='email' placeholder='example@gachon.ac.kr'
-                                    style="float:right;" required></td>
-                        </tr>
-                        <tr>
 
-                            <td width="50%"><b>닉네임</b></td>
-                            <td><input type='text' name='nickname' placeholder='nickname' style="float:right;" required>
-                            </td>
-                        </tr>
                     </table>
                     <br>
+                </div>
+                <div class="btm">
                     <input type='submit' onclick="test()" value="Sign Up">
                     <p>
                     <p><a href="/login"><b>이미 계정이 있으신가요??</b></a>
-
                 </div>
         </div>
+    </div>
     </div>
     </div>
 
