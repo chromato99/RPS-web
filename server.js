@@ -44,11 +44,12 @@ app.use(passport.session());
 
 passport.use(new LocalStrategy(
     function(username, password, done) {
-    db.query('SELECT * FROM users WHERE username=?', [username], (err, results) => {
+    db.query('SELECT * FROM user WHERE username=?', [username], (err, results) => {
         if(err) return done(err);
         if(!results[0]) 
             return done('please check your username.');
         else {
+            db.query('UPDATE user SET last_connection=NOW() WHERE username=?', [username]);
             let user = results[0];
             const [encrypted, salt] = user.password.split("$");
             crypto.pbkdf2(password, salt, 65536, 64, 'sha512', (err, derivedKey) => {
@@ -67,7 +68,7 @@ passport.serializeUser(function(user, done) {
 });
 
 passport.deserializeUser(function(username, done) {
-    db.query('SELECT * FROM users WHERE username=?', [username], function(err, results){
+    db.query('SELECT * FROM user WHERE username=?', [username], function(err, results){
     if(err)
         return done(err, false);
     if(!results[0])
@@ -116,6 +117,7 @@ app.post('/login', // 로그인 요청이 들어왔을때
 );
 
 app.get('/logout', (req, res) => {
+    db.query('UPDATE user SET last_connection=NOW() WHERE username=?', [req.user.username]);
     req.logout();
     res.redirect('/login');
 });
@@ -129,7 +131,7 @@ app.get('/signup', (req, res) => {
 });
 
 app.post('/signup', (req, res) => {
-    db.query('SELECT * FROM users WHERE username=?', [req.body.username], (err, results) => {
+    db.query('SELECT * FROM user WHERE username=?', [req.body.username], (err, results) => {
         if(err)
             res.render('signup', {message: 'input sign up data'});
         if(!!results[0])
@@ -138,7 +140,7 @@ app.post('/signup', (req, res) => {
             const randomSalt = crypto.randomBytes(32).toString("hex");
             crypto.pbkdf2(req.body.password, randomSalt, 65536, 64, "sha512", (err, encryptedPassword) => {
                 const passwordWithSalt = encryptedPassword.toString("hex")+"$"+randomSalt;
-                db.query("insert into users(username, password) values(?,?)",  [req.body.username, passwordWithSalt], (err2)=> {
+                db.query("insert into user(username, password, email, win, loss, draw,last_connection) values(?,?,?, 0, 0, 0, NOW())",  [req.body.username, passwordWithSalt, req.body.email], (err2)=> {
                     if(err2) 
                         res.render('signup', {message: 'failed creating new account'});
                     else
@@ -196,11 +198,12 @@ app.post('/newroom', (req, res) => {
                 res.redirect('/newroom');
             }
         });
-        let table = {
-            name: '',
+        let room = {
+            name: req.body.roomname,
             players: new Array(),
+            max_player_count: req.body.max
         };
-        roomList.push(table);
+        roomList.push(room);
         
         res.redirect('/game/' + req.body.roomname);
     }
@@ -210,6 +213,11 @@ app.get('/game/:roomname', (req, res) => {
     if(!req.user) {
         res.redirect('/login');
     } else {
+        roomList.forEach((elem) => {
+            if(elem.players.length == elem.max_player_count) {
+                res.redirect('/lobby');
+            }
+        });
         res.render('RSPgame', {username: req.user.username, roomname: req.body.roomname});
     }
 });
@@ -231,21 +239,30 @@ lobbyIO.on('connection', (socket) => {
         lobbyIO.emit('lobby:chatemit', 'Joined Lobby!!', socket.request.user.username);
     });
 
-    socket.on('lobby:sendChat', (msg, username) => {
-        console.log('lobbyIO(' + socket.request.user.username + ') : ' + msg);
-        lobbyIO.emit('lobby:emitChat', msg, socket.request.user.username);
+    socket.on('lobby:sendChat', (msg) => {
+        if(msg.includes("$$:")) {
+            const [destUsername, message] = msg.split("$$:");
+            let socketList = lobbyIO.sockets;
+            if(socketList.size > 0) {
+                socketList.forEach((elem) => {
+                    if(elem.request.user.username == destUsername) {
+                        console.log('lobby:emitChat', `(Whisper) : ` + message);
+                        lobbyIO.to(elem.id).emit('lobby:emitChat', `(Whisper) : ` + message, socket.request.user.username);
+                        lobbyIO.to(socket.id).emit('lobby:emitChat', `(Whisper) : ` + message, socket.request.user.username);
+                    }
+                });
+            }
+        } else {
+            console.log('lobbyIO(' + socket.request.user.username + ') : ' + msg);
+            lobbyIO.emit('lobby:emitChat', msg, socket.request.user.username);
+        }
     });
 
-    socket.on('lobby:sendWhisper', (msg, userList) => {
-        userList.forEach((elem) => {
-            lobbyIO.to(elem).emit('lobby:emitChat', "(Whisper)" + msg, socket.request.user.username);
-        });
-    });
 
-    socket.on('reqUserList', () => {
+    socket.on('lobby:reqUserList', () => {
         let userList = new Array();
         let socketList = lobbyIO.sockets;
-        if(socketList.legth > 0) {
+        if(socketList.size > 0) {
             socketList.forEach((elem) => {
                 userList.push({
                     id: elem.id,
@@ -254,6 +271,13 @@ lobbyIO.on('connection', (socket) => {
             });
         }
         socket.emit('resUserList', userList);
+    });
+
+    socket.on('lobby:reqUserData', (username) => {
+        db.query('SELECT * FROM user WHERE username=?', [username], (err, results) => {
+            results[0].password = '';
+            socket.emit('lobby:resUserData', results[0]);
+        });
     });
 
 });
@@ -284,7 +308,7 @@ gameIO.on('connection', (socket) => {   //연결이 들어오면 실행되는 �
     socket.on('reqUserList', () => {
         let userList = new Array();
         let socketList = lobbyIO.sockets;
-        if(socketList.legth > 0) {
+        if(socketList.size > 0) {
             socketList.forEach((elem) => {
                 userList.push({
                     id: elem.id,

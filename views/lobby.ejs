@@ -6,6 +6,40 @@
     h1 {
         text-align: center;
     }
+    .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+    
+        /* Modal Content/Box */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%; /* Could be more or less, depending on screen size */                          
+        }
+        /* The Close Button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
 
     </style>
 </head>
@@ -29,17 +63,25 @@
             </form>
         </div>
         <div style="float: left;">
-            <select id="userList" style="width: 300px; height: 600px; display: block;" multiple>
+            <ul id="userlist">
                 <% for(let i = 0; i < userList.length; i++) { %> 
-                    <option value="<%= userList[i].id %>"><%= userList[i].username %></option>
+                    <li ><%= userList[i].username %><button onclick="getUserData('<%= userList[i].username %>')" >Show Data</button><button onclick="whisper('<%= userList[i].username %>')" >Whisper</button></li>
                 <% } %>
-            </select>
-            <form id="whisperForm">
-                <input id="whisperInput" autocomplete="off" type="text">
-                <button type="submit">Send Whisper</button>
-            </form>
+            </ul>
         </div>
     </div>
+
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+      <!-- Modal content -->
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <div id="userdata">
+
+        </div>
+      </div>
+    </div>
+
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
@@ -49,6 +91,50 @@
 
         var chatForm = document.getElementById('chatForm');
         var whisperForm = document.getElementById('whisperForm');
+
+        var modal = document.getElementById('myModal');
+ 
+        // Get the <span> element that closes the modal
+        var modalspan = document.getElementsByClassName("close")[0];
+ 
+
+ 
+        // When the user clicks on <span> (x), close the modal
+        modalspan.onclick = function() {
+            modal.style.display = "none";
+            var userData = document.getElementById('userdata');
+            userData.innerHTML = '';
+        }
+ 
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function(event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+                var userData = document.getElementById('userdata');
+                userData.innerHTML = '';
+            }
+        }
+
+        function getUserData(username) {
+            modal.style.display = "block";
+            console.log(username);
+            socket.emit('lobby:reqUserData', username);
+        }
+
+        function whisper(username) {
+            modal.style.display = "none";
+            var userData = document.getElementById('userdata');
+            userData.innerHTML = '';
+            var chatInput = document.getElementById('chatInput');
+            chatInput.value = username + '$$:';
+        }
+
+        function closeModal() {
+            modal.style.display = "none";
+            var userData = document.getElementById('userdata');
+            userData.innerHTML = '';
+        }
+
 
         socket.on('lobby:emitChat', (msg, username) => {
             var chatArea = document.getElementById('chatArea');
@@ -63,30 +149,40 @@
             });
         });
 
+        socket.on('lobby:resUserData', (data) => {
+            var userData = document.getElementById('userdata');
+            console.log(data);
+            userData.innerHTML = `
+                <p>User name : ${data.username}</p>
+                <p>User email : ${data.email}</p>
+                <p>Win : ${data.win}</p>
+                <p>Loss : ${data.loss}</p>
+                <p>Draw : ${data.draw}</p>
+                <p>Last Login : ${data.last_connection}</p>
+                <button onclick="whisper('${data.username}')">Whisper</button>
+            `;
+        });
+
+        socket.on('lobby:invite', (username, roomname) => {
+            var userData = document.getElementById('userdata');
+            console.log(data);
+            userData.innerHTML = `
+                <p>User name : ${username}</p>
+                <p>Invite you to </p>
+                <button><a href="/game/${roomname}">Accept Invite</a></button>
+                <button onclick="closeModal()">Cancel</button>
+            `;
+        });
+
+
         chatForm.onsubmit = (e) => {
             e.preventDefault();
             var chatInput = document.getElementById('chatInput');
 
             // socket.emit으로 서버에 신호를 전달
-            socket.emit('lobby:sendChat', chatInput.value, inputname);
+            socket.emit('lobby:sendChat', chatInput.value);
 
             chatInput.value = "";
-        };
-
-        whisperForm.onsubmit = (e) => {
-            e.preventDefault();
-            let whisperInput = document.getElementById('whisperInput');
-            let userList = document.getElementById('userList').options;
-            let selectedUserList = new Array();
-            for(let i = 0; userList.length; i++) {
-                if(userList[i].selected) {
-                    selectedUserList.push(userList[i].value);
-                }
-            }
-            // socket.emit으로 서버에 신호를 전달
-            socket.emit('lobby:sendWhisper', whisperInput.value, selectedUserList);
-
-            whisperInput.value = "";
         };
     </script>
 </body>
