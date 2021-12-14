@@ -2,27 +2,70 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Socket.IO 예제</title>
+    <title>RPS-web</title>
+    <style>
+        .modal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgb(0,0,0); /* Fallback color */
+            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        }
+
+        /* Modal Content/Box */
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 50%; /* Could be more or less, depending on screen size */                          
+        }
+        /* The Close Button */
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+    </style>
 </head>
 <body>
+    <button onclick="closeGame()" style="float: left;">Back</button>
     <div style="float: left; width: 50%;">
-        <div id = "control" style="display: none;">
-            <form id="rock">
-                <button type="submit">rock</button>
-            </form>
-            
-            <form id="scissor">
-                <button type="submit">scissor</button>
-            </form>
-    
-            <form id="paper">
-                <button type="submit">paper</button>
-            </form>
-        
-            <form id="ready">
-                <button type="submit">ready</button>
-            </form>
+        <div>
+            <table id="usertable" style="float: left; height: 600px; width: 800px;">
+                <tr>
+                <% for(let i = 0; i < room.max_player_count; i++) { %>
+                    <% if(i == 4) { %> 
+                    </tr><tr>
+                    <% } %> 
+                    <td id="<%= i %> ">
+                        <table>
+                            <td>
+                            </td>
+                            <td>
+                            </td>
+                        </table>
+                    </td>
+                <% } %> 
+                </tr>
+            </table>
         </div>
+        <button id="readybtn" onclick="setReady()">ready</button>
         <ul id="messages" type="none">
             
         </ul>
@@ -40,20 +83,26 @@
             
         </ul>
     </div>
+
+    <!-- The Modal -->
+    <div id="myModal" class="modal">
+        <!-- Modal content -->
+        <div class="modal-content">
+            <div id="insideModal"></div>
+        </div>
+      </div>
     
 
     <script src="/socket.io/socket.io.js"></script>
     <script>
-        var inputname = "<%= username %>"; // 유저 이름 입력 받기
+        var username = "<%= username %>"; // 유저 이름 입력 받기
         var roomname = "<%= roomname %>";
         var socket = io('/game');
         socket.emit('newPlayer', roomname);
+        socket.emit('reqRoomData');
 
-        var rock = document.getElementById('rock');
-        var scissor = document.getElementById('scissor');
-        var paper = document.getElementById('paper');
-        var ready = document.getElementById('ready');
         var chatform = document.getElementById('chatform');
+        var modal = document.getElementById('myModal');
 
         function showLobbyUserList() {
             var userlist = document.getElementById('userlist');
@@ -65,6 +114,11 @@
             }
         }
 
+        function closeGame() {
+            socket.disconnect();
+            window.location.href = '/lobby';
+        }
+
         function invite(id) {
             var button = document.getElementById(id);
             button.innerHTML = 'Invited';
@@ -72,9 +126,69 @@
             socket.emit('reqInviteUser', id);
         }
 
-        socket.on('startGame', (data) => { // 게임 시작됩을 알려주는 응답
-            
-            socket.emit('reqGameData');
+        function setReady() {
+            let readybtn = document.getElementById('readybtn');
+            readybtn.disabled = true;
+            socket.emit('ready');
+        }
+
+        function setRock() {
+            modal.style.display = 'none';
+            socket.emit('setSelection', 'rock', 1);
+        }
+
+        function setPaper() {
+            modal.style.display = 'none';
+            socket.emit('setSelection', 'paper', 2);
+        }
+
+        function setScissor() {
+            modal.style.display = 'none';
+            socket.emit('setSelection', 'scissor', 3);
+        }
+
+        socket.on('gameStarted', (data) => { // 게임 시작됩을 알려주는 응답
+            let insideModal = document.getElementById('insideModal');
+            modal.style.display = 'block';
+            insideModal.innerHTML = `
+                <h2>Game Started!!</h2>
+                <h3>Select your choice</h3>
+                <button onclick="setRock()">Rock</button>
+                <button onclick="setScissor()">Scissor</button>
+                <button onclick="setPaper()">Paper</button>
+            `;
+        });
+
+        socket.on('draw', () => {
+            let insideModal = document.getElementById('insideModal');
+            modal.style.display = 'block';
+            insideModal.innerHTML = `
+                <h2>You Draw</h2>
+                <button onclick="closeGame()">Back To Lobby</button>
+            `;
+        });
+
+        socket.on('winloss', (players, winSelection) => {
+            let insideModal = document.getElementById('insideModal');
+            modal.style.display = 'block';
+
+            let player;
+            players.forEach((elem) => {
+                if(elem.name == username) {
+                    player = elem;
+                }
+            });
+            if(elem.selection == winSelection) {
+                insideModal.innerHTML = `
+                    <h2>You Win!!</h2>
+                    <button onclick="closeGame()">Back To Lobby</button>
+                `;
+            } else {
+                insideModal.innerHTML = `
+                    <h2>You Lose T.T</h2>
+                    <button onclick="closeGame()">Back To Lobby</button>
+                `;
+            }
         });
 
         // 메시지 수신시 HTML에 메시지 내용 작성
@@ -89,6 +203,22 @@
         socket.on('emitChat', (msg, username) => {
             var chatarea = document.getElementById('chatarea');
             chatarea.append("\n" + username + " : " + msg);
+        });
+
+        socket.on('resRoomData', (data) => {
+            for(let i = 0; i < data.players.length; i++) {
+                let td = document.getElementById(i);
+                td.innerHTML = `
+                    <table>
+                        <tr>
+                            <td>${data.players[i].name}</td>
+                        </tr>
+                        <tr>
+                            <td>${data.players[i].status}</td>
+                        </tr>
+                    </table>
+                `;
+            }
         });
         
         socket.on('resLobbyUserList', (data) => {
