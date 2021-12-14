@@ -11,15 +11,35 @@
     </style>
 </head>
 
-<body>
-    <h1 style="font-size: 50px;"> New Room</h1>
-    <a href="/lobby">Back</a>
 
+<br><br>
+
+  
+    <body bgcolor="#C1F7F7">
+    <h1 style="font-size: 50px;"> New Room</h1>
+
+    <br><br> <br><br>
+
+    &emsp;
+    <img src="https://t4.ftcdn.net/jpg/00/86/16/21/240_F_86162112_uOlc958HLu91DMpNj7YxNgHdIhD5NQ78.jpg"
+    style="width: 35px;"> &nbsp;
+    <a href="/lobby" > <font size="10"  color="black"> Back</a> </font>
+
+    <br><br><br>
 
     <form action='/newroom' method='post'>
-        <label for="numberOfPlayers" width="1000px">Choose a number of max player:</label>
+        &emsp;
+        <img src="https://t4.ftcdn.net/jpg/01/37/39/61/240_F_137396146_YdMApcVRhlbLZXvzzxRnlGImQbJ6zQuO.jpg" style="height:300px;width: 250px;">
+        &emsp;<img src="https://t4.ftcdn.net/jpg/01/37/39/61/240_F_137396133_S49HfXiYBw32t0pgTG3tbP11H6Qq172J.jpg" style="height:300px;width: 250px;">
+        &emsp;<img src="https://t4.ftcdn.net/jpg/01/37/39/61/240_F_137396161_FFg2Zew8qbtvfqY9oXidLi1US231xhU2.jpg" style="height:300px;width: 250px;">
 
-        <select name="max" id="numberOfPlayers">
+<br><br><br><br><br>
+&emsp;&nbsp;
+        <label for="numberOfPlayers"> <font size="12" style="font-family:Arial, Helvetica, sans-serif;" color="black">
+            Choose a number of max player :</label> </font>
+
+            &emsp;&emsp;         
+        <select name="max" id="numberOfPlayers" style="width: 70px; height: 48px; font-size: 25px;">
             <option value="2">2</option>
             <option value="3">3</option>
             <option value="4">4</option>
@@ -29,9 +49,15 @@
             <option value="8">8</option>
         </select>
 
-        <input type='text' size='10' name='roomname' placeholder='Room Name' style="height: 30px;width: 170px;">
+        
+        <input type='text' size='100' name='roomname' placeholder='Room Name'  style="height: 50px;width: 230px; font-size: 20px;">
         <!-- <input type='password' name='password' placeholder='password'> -->
-        <input type='submit' style="height: 30px;width: 50px;">
+     
+        <input type='submit' style="height: 50px;width: 50px; font-size: 15px;"> &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+
+        
     </form>
+
+
 </body>
 </html>
