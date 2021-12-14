@@ -201,8 +201,8 @@
         }
         /* style of button when it is clicked */
         button:active {
-            margin-left: 1%;
-            margin-bottom: 1%;
+            margin-left: 0.5%;
+            margin-bottom: 0.5%;
             box-shadow: none;
         }
         
@@ -389,12 +389,12 @@
             var userList = document.getElementById('userlist');
             userList.innerHTML = '';
             userList.innerHTML += `
-            <li >${data[0].username}<button onclick="getUserData('${data[0].username}')" >Show Data</button></li>
+            <li >${data[0].username}&nbsp &nbsp &nbsp &nbsp<button onclick="getUserData('${data[0].username}')" >Show Data</button></li>
             `;
             data.shift();
             data.forEach((elem) => {
                 userList.innerHTML += `
-                <li >${elem.username}<button onclick="getUserData('${elem.username}')" >Show Data</button>&nbsp<button onclick="whisper('${elem.username}')" >Whisper</button></li>
+                <li >${elem.username}&nbsp &nbsp &nbsp &nbsp<button onclick="getUserData('${elem.username}')" >Show Data</button>&nbsp<button onclick="whisper('${elem.username}')" >Whisper</button></li>
                 `;
             });
         });
