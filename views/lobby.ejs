@@ -7,6 +7,10 @@
         h1 {
             text-align: center;
         }
+        body {
+            text-align: center;
+            background-color: #DFEBF1;
+        }
 
         /* style for modal */
         .modal {
@@ -34,10 +38,11 @@
         .modal-content {
             background-color: #fefefe;
             margin: 15% auto;
+            text-align: left;
             /* 15% from the top and centered */
             padding: 20px;
             border: 1px solid #888;
-            width: 50%;
+            width: 70%;
             /* Could be more or less, depending on screen size */
         }
 
@@ -49,19 +54,7 @@
             font-weight: bold;
         }
 
-        /* Division containing the whole document */
-        div.default {
-            margin: 0px;
-            margin-top: -8px;
-            margin-left: -7px;
-            padding: 0;
-            width: 99.9vw;
-            height: 99vh;
-            background-color: #DFEBF1;
-            /* sets the minimum size of the window, shouldn't be smaller than this size */
-            min-width: 1500px;
-            min-height: 800px;
-        }
+        
 
         /* action for hover, or focus */
         .close:hover,
@@ -75,33 +68,26 @@
         table.roomlist {
             border: 1px solid black;
             text-align: center;
-            padding: 0px;
         }
 
         /* dedault style of td */
         td {
             border: 1px solid black;
-            text-align: center;
-            padding: 0px;
         }
 
         /* default style of th */
         th {
             border: 1px solid black;
-            text-align: center;
-            padding: 0px;
         }
 
         /* style for containing selection of user chosen activities */
         td.n {
-            text-align: center;
             border: none;
             color: rgb(61, 25, 223);
         }
 
         /* style for containing selection of user chosen activities */
         th.n {
-            text-align: center;
             border: none;
             color: rgb(61, 25, 223);
         }
@@ -115,12 +101,7 @@
 
         /* style for top part of the document */
         div.top {
-            margin: 0px;
             width: 100%;
-            height: 15%;
-            float: left;
-            box-sizing: content-box;
-            text-align: center;
             /* style for text */
             border-bottom-style: solid;
             border-bottom-width: 4px;
@@ -129,51 +110,42 @@
 
         }
 
+        /* Division containing the whole document */
+        div.default {
+            margin: auto;
+            display: inline-block;
+            text-align: left;
+        }
+
         /* style for the bottom left part of the document */
         div.left {
-            margin: 0px;
-            width: 45%;
-            height: 85%;
             float: left;
-            text-align: center;
-
+            width: 360px;
+            min-height: 500px;
         }
 
         /* style for the center bottom part of the document */
         div.center {
-            margin: 0px;
-            width: 25%;
-            height: 85%;
-            float: right;
-            text-align: left;
-
+            float: left;
+            width: 300px;
+            min-height: 300px;
         }
 
         /* style for the right bottom part of the document */
         div.right {
-            margin: 0px;
-            width: 30%;
-            height: 85%;
-            float: right;
-
+            float: left;
+            width: 360px;
         }
 
         /* style for dividing divided part again */
-        div.cht {
-            margin: 0px;
+        div.inner {
             width: 100%;
-            height: 90%;
-            float: right;
-
-
+            float: left;
         }
 
         /* style for dividing divided part again */
         div.lgout {
-
-            margin: 0px;
             width: 100%;
-            height: 10%;
             float: right;
             text-align: center;
         }
@@ -196,8 +168,6 @@
             background-color: rgba(106, 190, 223, 0.479);
             color: rgb(58, 61, 219);
             padding: 5px;
-           
-
         }
         /* style of button when it is clicked */
         button:active {
@@ -215,17 +185,18 @@
 </head>
 
 <body>
+    <!-- divide for the top of the document -->
+    <div class="top">
+        <h1><a class="t" href="/lobby">RPS-web Lobby</a></h1>
+    </div>
     <!-- the whole document -->
     <div class="default">
-        <!-- divide for the top of the document -->
-        <div class="top">
-            <h1><a class="t" href="/lobby">Welcome to Lobby</a></h1>
-        </div>
+        
         <!-- divide for the left part of the document -->
         <div class="left">
             <!-- divide again -->
-            <div class="lgout">
-                <table style="width: 200px;  margin-right:auto;">
+            <div class="inner">
+                <table style="width: 200px; ">
                     <!-- table for link to making room, refreshing user data -->
                     <tr class="n">
                         <!-- creating new room when user presses button -->
@@ -237,16 +208,14 @@
                     <!-- refreshing list of room when user input data -->
                     <tr class="n">
                         <th class="n">Refresh Room List</th>
-                        <th class="n"> <button onclick="socket.emit('lobby:reqRoomList');"><img
-                                    src="https://cdn-icons-png.flaticon.com/512/740/740819.png" style="height: 20px;">
-                            </button></th>
+                        <th class="n"> <button onclick="socket.emit('lobby:reqRoomList');"><img src="https://cdn-icons-png.flaticon.com/512/740/740819.png" style="height: 20px;"></button></th>
                     </tr>
                 </table>
             </div>
             <!-- divide again inside left division -->
-            <div class="cht">
+            <div class="inner">
                 <!-- table containing list of room -->
-                <table id="roomlist" style="width: 700px;">
+                <table id="roomlist" style="width: 360px;">
                     <th>Room Name</th>
                     <th>Max</th>
                     <th>Current</th>
@@ -254,26 +223,6 @@
                 </table>
 
             </div>
-        </div>
-        <!-- divide class for the right part -->
-        <div class="right">
-            <!-- divide again inside right side -->
-            <div class="cht">
-                <!-- text area for chatting with other users -->
-                <textarea id="chatArea" onfocus="javascript:blur();"
-                    style="width: 99%; height: 600px; cursor: default; "></textarea>
-                    <!-- chatting input -->
-                <form id="chatForm">
-                    <input id="chatInput" autocomplete="off" type="text" style="width: 87%">
-                    <button type="submit">Send</button>
-                </form>
-            </div>
-            <!-- divide for logging out -->
-            <div class="lgout">
-                <a href="/logout"><img src="https://icon-library.com/images/free-logout-icon/free-logout-icon-7.jpg"
-                        style="height: 50px;"></a>
-            </div>
-
         </div>
 
         <!-- divide for the centeral part -->
@@ -283,16 +232,35 @@
                 <!-- when button is clicked, user list is updated -->
                 <tr class="n">
                     <th class="n">Refresh User List</th>
-                    <th class="n"> <button onclick="socket.emit('lobby:reqUserList');"><img
-                                src="https://cdn-icons-png.flaticon.com/512/740/740819.png" style="height: 20px;">
-
-                        </button></th>
+                    <th class="n"> <button onclick="socket.emit('lobby:reqUserList');"><img src="https://cdn-icons-png.flaticon.com/512/740/740819.png" style="height: 20px;"></button></th>
                 </tr>
             </table>
 
             <ul id="userlist">
             </ul>
         </div>
+
+        <!-- divide class for the right part -->
+        <div class="right">
+            <!-- divide again inside right side -->
+            <div class="inner">
+                <!-- text area for chatting with other users -->
+                <textarea id="chatArea" onfocus="javascript:blur();"
+                    style="width: 98%; height: 500px; cursor: default; "></textarea>
+                    <!-- chatting input -->
+                <form id="chatForm">
+                    <input id="chatInput" autocomplete="off" type="text" style="width: 87%">
+                    <button type="submit">Send</button>
+                </form>
+            </div>
+            <!-- divide for logging out -->
+            <div class="lgout">
+                <a href="/logout"><img src="https://icon-library.com/images/free-logout-icon/free-logout-icon-7.jpg" style="height: 50px;"></a>
+            </div>
+
+        </div>
+
+        
     </div>
 
     <!-- The Modal -->

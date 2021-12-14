@@ -8,53 +8,49 @@
             font-size: 50px;
             /*input your id and password align the text to the center */
         }
+
+        body {
+            background-color: #DFEBF1;
+            text-align: center;
+        }
     </style>
 </head>
 
-<body bgcolor="#DFEBF1">
+<body>
     <!-- background color -->
-    <br> <br> <br> <br> <br>
     <h1>
         RPS-web
     </h1>
 
-    <br> <br> <br> <br> <br>
-    &emsp;&emsp;&emsp;&emsp;
+    <div style="display: inline-block;">
+        <img src="https://t3.ftcdn.net/jpg/00/60/63/86/240_F_60638664_Fv7a3fZFPiV2UzGzHJ5m4Fh2Hr4Auxf0.jpg">
 
+        <img src="https://t3.ftcdn.net/jpg/00/60/63/36/240_F_60633690_3o9vxNFlhh9tCJK30Rzq1AErRHbfJ5jC.jpg">
 
-    <!-- array the 3 images -->
-
-    &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-    &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-    <img src="https://t3.ftcdn.net/jpg/00/60/63/86/240_F_60638664_Fv7a3fZFPiV2UzGzHJ5m4Fh2Hr4Auxf0.jpg">
-    &emsp;&emsp;
-
-    <img src="https://t3.ftcdn.net/jpg/00/60/63/36/240_F_60633690_3o9vxNFlhh9tCJK30Rzq1AErRHbfJ5jC.jpg">
-    &emsp;&emsp;
-
-    <img src="https://t3.ftcdn.net/jpg/00/60/69/84/240_F_60698479_hBqzKxYyI5XC2f0E8WkcFUFAUNiTnM2K.jpg">
-    &emsp;&emsp;&emsp;
+        <img src="https://t3.ftcdn.net/jpg/00/60/69/84/240_F_60698479_hBqzKxYyI5XC2f0E8WkcFUFAUNiTnM2K.jpg">
+    </div>
+    
+    <br>
 
 
 
 
     <!-- if you press sign up button, move to the sign up page -->
-    <div style="text-align: center;"> <br><br><br><br>
+    <div style="text-align: center; display: inline-block; font-size: 30; color: blue; margin-top: 50;">
         <a href="/signup" style = "text-decoration-line: none;">
-            <font size="6" color="blue"><b>Sign Up</b> <br><br>
-        </a> </font>
-
+            <b>Sign Up</b>
+        </a>
     </div>
-
-    <div style="text-align: center;">
+    <br>
+    <div style="text-align: center; display: inline-block; margin-top: 20px;">
         <form action='/login' method='post'>
-            <input type='text' name='username' placeholder='Username' style="height: 25px;width: 170px;">
+            <input type='text' name='username' placeholder='Username' style="height: 40px;width: 170px;" required>
             <!-- enter username-->
 
-            <input type='password' name='password' placeholder='Password' style="height: 25px;width: 170px;">
+            <input type='password' name='password' placeholder='Password' style="height: 40px;width: 170px;" required>
             <!-- enter password -->
 
-            <input type='submit' style="height: 25px;width: 100px; " value="Log In">
+            <input type='submit' style="height: 40px;width: 100px; " value="Log In">
             <!-- submit' button -->
         </form>
     </div>
