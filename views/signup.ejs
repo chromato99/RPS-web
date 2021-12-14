@@ -11,9 +11,12 @@
         /*style for div tag that contains the whole document*/
         div {
             margin: 0px;
+            margin-top: -8px;
+            margin-left: -7px;
             padding: 0;
             width: 100vw;
-            height: 100vh;
+            height: 90vh;
+            position: sticky;
         }
 
         /*style for division for the top part of the document*/
@@ -29,6 +32,7 @@
             border-bottom-width: 3px;
             border-bottom-color: rgb(210, 156, 226);
             text-shadow: 2px 2px 2px rgb(102, 97, 97);
+
         }
 
         /*style for division for the top part of center div part*/
@@ -45,7 +49,7 @@
         div.left {
             margin: 0px;
             width: 30%;
-            height: 85%;
+            height: 100%;
             float: left;
             text-align: center;
         }
@@ -54,7 +58,7 @@
         div.center {
             margin: 0px;
             width: 40%;
-            height: 85%;
+            height: 100%;
             float: right;
             text-align: center;
         }
@@ -63,7 +67,7 @@
         div.right {
             margin: 0px;
             width: 30%;
-            height: 85%;
+            height: 100%;
             float: right;
 
         }
@@ -74,6 +78,17 @@
             width: 100%;
             height: 25%;
             float: left;
+
+        }
+        /* style for the bottom part of the document */
+        div.bottom{
+            margin: 0px;
+            width: 100%;
+            height: 85%;
+            float: left;
+            box-sizing: content-box;
+            text-align: center;
+           
 
         }
 
@@ -153,6 +168,8 @@
             </div>
         </div>
 
+        <div class = "bottom">
+
         <!-- divide for the left part of the remaining part of the document except for the top part -->
         <div class="left">
 
@@ -217,9 +234,9 @@
                     <p><a href="/login"><b>이미 계정이 있으신가요??</b></a>
                 </div>
         </div>
+        </div>
     </div>
-    </div>
-    </div>
+
 
 </body>
 
