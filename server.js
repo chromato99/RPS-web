@@ -361,7 +361,6 @@ gameIO.on('connection', (socket) => {   //연결이 들어오면 실행되는 �
             }
         });
         socket.data.room.ready++;
-        gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
         gameIO.to(socket.data.roomname).emit('message', socket.request.user.username + ' Selected');
         if(socket.data.room.players.length == socket.data.room.ready) {
             socket.data.room.ready = 0;
