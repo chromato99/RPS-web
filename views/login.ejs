@@ -3,55 +3,62 @@
 <head>
     <title>Login</title>
     <style type="text/css">
-    h1 {
-        text-align: center;     /*input your id and password 문장 가운데로 정렬 */
-        
-    }
-
+        h1 {
+            text-align: center;
+            /*input your id and password 문장 가운데로 정렬 */
+            font-size: 50px;
+        }
     </style>
 </head>
 
-<body bgcolor="#DFEBF1">          <!-- 배경색 -->
+<body bgcolor="#DFEBF1">
+    <!-- 배경색 -->
     <br> <br> <br> <br> <br>
-    <h1 ><%= message %> </h1>
+    <h1>
+        <%= message %>
+    </h1>
 
     <br> <br> <br> <br> <br>
     &emsp;&emsp;&emsp;&emsp;
 
 
-<!-- 이미지 세개 정렬 -->
+    <!-- 이미지 세개 정렬 -->
 
-&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;  &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-<img src="https://t3.ftcdn.net/jpg/00/60/63/86/240_F_60638664_Fv7a3fZFPiV2UzGzHJ5m4Fh2Hr4Auxf0.jpg">
-&emsp;&emsp;
+    &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+    &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
+    <img src="https://t3.ftcdn.net/jpg/00/60/63/86/240_F_60638664_Fv7a3fZFPiV2UzGzHJ5m4Fh2Hr4Auxf0.jpg">
+    &emsp;&emsp;
 
-<img src="https://t3.ftcdn.net/jpg/00/60/63/36/240_F_60633690_3o9vxNFlhh9tCJK30Rzq1AErRHbfJ5jC.jpg">
-&emsp;&emsp;
+    <img src="https://t3.ftcdn.net/jpg/00/60/63/36/240_F_60633690_3o9vxNFlhh9tCJK30Rzq1AErRHbfJ5jC.jpg">
+    &emsp;&emsp;
 
-<img src="https://t3.ftcdn.net/jpg/00/60/69/84/240_F_60698479_hBqzKxYyI5XC2f0E8WkcFUFAUNiTnM2K.jpg">
-&emsp;&emsp;&emsp;
-
-
+    <img src="https://t3.ftcdn.net/jpg/00/60/69/84/240_F_60698479_hBqzKxYyI5XC2f0E8WkcFUFAUNiTnM2K.jpg">
+    &emsp;&emsp;&emsp;
 
 
-<!-- 누르면 sign up(회원가입 창)으로 이동 -->
-    <div style="text-align: center;">  <br><br><br><br>
-    <a href="/signup">  <font size="7"  color="black"> Sign Up <br><br> </a> </font>
 
-</div>
 
-<div style="text-align: center;">
-    <form action='/login' method='post'>
-        <input type='text' name='username' placeholder='Username' style="height: 25px;width: 170px;">
-        <!-- username 입력 -->
+    <!-- 누르면 sign up(회원가입 창)으로 이동 -->
+    <div style="text-align: center;"> <br><br><br><br>
+        <a href="/signup" style = "text-decoration-line: none;">
+            <font size="6" color="blue"><b>Sign Up</b> <br><br>
+        </a> </font>
 
-        <input type='password' name='password' placeholder='Password' style="height: 25px;width: 170px;">
-        <!-- 비밀번호 입력 -->
+    </div>
 
-        <input type='submit' style="height: 25px;width: 100px;">
-        <!-- 제출란  -->
-    </form>
-</div>
+    <div style="text-align: center;">
+        <form action='/login' method='post'>
+            <input type='text' name='username' placeholder='Username' style="height: 25px;width: 170px;">
+            <!-- username 입력 -->
+
+            <input type='password' name='password' placeholder='Password' style="height: 25px;width: 170px;">
+            <!-- 비밀번호 입력 -->
+
+            <input type='submit' style="height: 25px;width: 100px;">
+            <!-- 제출란  -->
+        </form>
+    </div>
 
 </body>
+
 </html>

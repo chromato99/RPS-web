@@ -12,10 +12,12 @@
 </head>
 
 <body>
-    <h1>New Room</h1>
+    <h1 style="font-size: 50px;"> New Room</h1>
     <a href="/lobby">Back</a>
+
+
     <form action='/newroom' method='post'>
-        <label for="numberOfPlayers">Choose a number of max player:</label>
+        <label for="numberOfPlayers" width="1000px">Choose a number of max player:</label>
 
         <select name="max" id="numberOfPlayers">
             <option value="2">2</option>
@@ -26,9 +28,10 @@
             <option value="7">7</option>
             <option value="8">8</option>
         </select>
-        <input type='text' name='roomname' placeholder='room name'>
+
+        <input type='text' size='10' name='roomname' placeholder='Room Name' style="height: 30px;width: 170px;">
         <!-- <input type='password' name='password' placeholder='password'> -->
-        <input type='submit'>
+        <input type='submit' style="height: 30px;width: 50px;">
     </form>
 </body>
 </html>
