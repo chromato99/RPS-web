@@ -33,15 +33,13 @@
             <input id="chatinput" autocomplete="off" type="text">
             <button type="submit">Send</button>
         </form>
-        <form id="inviteform">
-            <button type="submit">Invite</button>
-        </form>
-        <form id="invitelist" style="display: none;">
-            <select multiple id="userlist" name="userlist" style="width: 400px; height: 400px;"></select>
-            <button type="submit">Invite</button>
-        </form>
     </div>
-    
+    <div style="float: left;">
+        <button onclick="showLobbyUserList()">Show User List</button>
+        <ul id="userlist" style="display: none;">
+            
+        </ul>
+    </div>
     
 
     <script src="/socket.io/socket.io.js"></script>
@@ -50,15 +48,29 @@
         var roomname = "<%= roomname %>";
         var socket = io('/game');
         socket.emit('newPlayer', roomname);
-        var player = {};
 
         var rock = document.getElementById('rock');
         var scissor = document.getElementById('scissor');
         var paper = document.getElementById('paper');
         var ready = document.getElementById('ready');
         var chatform = document.getElementById('chatform');
-        var inviteform = document.getElementById('inviteform');
-        var invitelist = document.getElementById('invitelist');
+
+        function showLobbyUserList() {
+            var userlist = document.getElementById('userlist');
+            if(document.getElementById('userlist').style.display == 'none') {
+                document.getElementById('userlist').style.display = "block";
+                socket.emit('reqLobbyUserList');
+            } else {
+                document.getElementById('userlist').style.display = "none";
+            }
+        }
+
+        function invite(id) {
+            var button = document.getElementById(id);
+            button.innerHTML = 'Invited';
+            button.disabled = true;
+            socket.emit('reqInviteUser', id);
+        }
 
         socket.on('startGame', (data) => { // 게임 시작됩을 알려주는 응답
             
@@ -78,41 +90,16 @@
             var chatarea = document.getElementById('chatarea');
             chatarea.append("\n" + username + " : " + msg);
         });
-
         
-        socket.on('resUserList', (data) => {
+        socket.on('resLobbyUserList', (data) => {
             var userList = document.getElementById('userlist');
-            userList.forEach((elem) => {
-                userList.innerHTML += `<option value="${elem.id}">${elem.username}</option>`;
+            userList.innerHTML = '';
+            data.forEach((elem) => {
+                userList.innerHTML += `
+                <li >${elem.username}<button onclick="getUserData('${elem.username}')" >Show Data</button><button id="${elem.id}" onclick="invite('${elem.id}')" >Invite</button></li>
+                `;
             });
         });
-
-        inviteform.onsubmit = (e) => {
-            e.preventDefault();
-            var invitelist = document.getElementById('invitelist');
-            if(document.getElementById('invitelist').style.display == 'none') {
-                document.getElementById('invitelist').style.display = "block";
-                socket.emit('reqUserList');
-            } else {
-                document.getElementById('invitelist').style.display = "none";
-            }
-            
-        }
-
-        invitelist.onsubmit = (e) => {
-            e.preventDefault();
-            let invitelist = document.getElementById('invitelist');
-            document.getElementById('invitelist').style.display = "none";
-            let userlist = document.getElementById('userlist');
-            let selectedUserList = new Array();
-            userlist.forEach((elem) => {
-                if(elem.selected) {
-                    selectedUserList.push(elem.value);
-                }
-            });
-
-            socket.emit('reqInviteUser', selectedUserList);
-        }
     </script>
 </body>
 </html>

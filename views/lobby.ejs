@@ -7,52 +7,57 @@
         text-align: center;
     }
     .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1; /* Sit on top */
-            left: 0;
-            top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgb(0,0,0); /* Fallback color */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-        }
-    
-        /* Modal Content/Box */
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto; /* 15% from the top and centered */
-            padding: 20px;
-            border: 1px solid #888;
-            width: 50%; /* Could be more or less, depending on screen size */                          
-        }
-        /* The Close Button */
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+    /* Modal Content/Box */
+    .modal-content {
+        background-color: #fefefe;
+        margin: 15% auto; /* 15% from the top and centered */
+        padding: 20px;
+        border: 1px solid #888;
+        width: 50%; /* Could be more or less, depending on screen size */                          
+    }
+    /* The Close Button */
+    .close {
+        color: #aaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+    .close:hover,
+    .close:focus {
+        color: black;
+        text-decoration: none;
+        cursor: pointer;
+    }
+    table, th, td {
+        border: 1px solid black;
+    }
 
     </style>
 </head>
 <body>
-    <h1>Welcome to Lobby</h1>
-    <div style="float: left; width: 35%;">
+    <h1><a href="/lobby">Welcome to Lobby</a></h1>
+    <div style="float: left; width: 50%;">
         <a href="/logout">Logout</a>
         <a href="/newroom">Make New Room</a>
-        <ul id="roomlist" type="none">
-            <% for(let i = 0; i < roomNameList.length; i++) { %> 
-                <li class = 'source' id = <%= i %> ><%= roomNameList[i].name %><a href="/game/<%= roomNameList[i].name %>">Join</a></li>
-            <% } %> 
-        </ul>
+        <button onclick="socket.emit('lobby:reqRoomList');">Refresh</button>
+        <table id="roomlist" style="width: 800px;">
+            <th>Room Name</th>
+            <th>Max</th>
+            <th>Current</th>
+            <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+        </table>
     </div>
     <div style="float: left;">
         <div style="float: left;">
@@ -63,10 +68,8 @@
             </form>
         </div>
         <div style="float: left;">
+            <button onclick="socket.emit('lobby:reqUserList');">Refresh</button>
             <ul id="userlist">
-                <% for(let i = 0; i < userList.length; i++) { %> 
-                    <li ><%= userList[i].username %><button onclick="getUserData('<%= userList[i].username %>')" >Show Data</button><button onclick="whisper('<%= userList[i].username %>')" >Whisper</button></li>
-                <% } %>
             </ul>
         </div>
     </div>
@@ -87,7 +90,8 @@
     <script>
         var inputname = "<%= username %>";
         var socket = io('/lobby');
-        socket.emit('lobby:newplayer', inputname);
+        socket.emit('lobby:reqRoomList');
+        socket.emit('lobby:reqUserList');
 
         var chatForm = document.getElementById('chatForm');
         var whisperForm = document.getElementById('whisperForm');
@@ -141,17 +145,43 @@
             chatArea.append("\n" + username + " : " + msg);
         });
 
+        socket.on('lobby:resRoomList', (data) => {
+            var roomList = document.getElementById('roomlist');
+            roomList.innerHTML = `
+                <th>Room Name</th>
+                <th>Max</th>
+                <th>Current</th>
+                <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
+            `;
+            console.log(data);
+            data.forEach((elem) => {
+                roomList.innerHTML += '<tr>'
+                roomList.innerHTML += `
+                    <td>${elem.name}</td>
+                    <td>${elem.max_player_count}</td>
+                    <td>${elem.players.length}</td>
+                    <td><a href="/game/${elem.name}">Join</a></td>
+                `;
+                roomList.innerHTML += '</tr>';
+            })
+        });
+
         socket.on('lobby:resUserList', (data) => {
-            var userList = document.getElementById('userList');
+            var userList = document.getElementById('userlist');
             userList.innerHTML = '';
-            userList.forEach((elem) => {
-                userList.innerHTML += `<option value="${elem.id}">${elem.username}</option>`;
+            userList.innerHTML += `
+            <li >${data[0].username}<button onclick="getUserData('${data[0].username}')" >Show Data</button></li>
+            `;
+            data.shift();
+            data.forEach((elem) => {
+                userList.innerHTML += `
+                <li >${elem.username}<button onclick="getUserData('${elem.username}')" >Show Data</button><button onclick="whisper('${elem.username}')" >Whisper</button></li>
+                `;
             });
         });
 
         socket.on('lobby:resUserData', (data) => {
             var userData = document.getElementById('userdata');
-            console.log(data);
             userData.innerHTML = `
                 <p>User name : ${data.username}</p>
                 <p>User email : ${data.email}</p>
@@ -159,13 +189,15 @@
                 <p>Loss : ${data.loss}</p>
                 <p>Draw : ${data.draw}</p>
                 <p>Last Login : ${data.last_connection}</p>
-                <button onclick="whisper('${data.username}')">Whisper</button>
             `;
+            if(data.username != inputname) {
+                userData.innerHTML += `<button onclick="whisper('${data.username}')">Whisper</button>`;
+            }
         });
 
         socket.on('lobby:invite', (username, roomname) => {
+            modal.style.display = "block";
             var userData = document.getElementById('userdata');
-            console.log(data);
             userData.innerHTML = `
                 <p>User name : ${username}</p>
                 <p>Invite you to </p>

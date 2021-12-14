@@ -155,28 +155,7 @@ app.get('/lobby', (req, res) => {
     if(!req.user) {
         res.redirect('/login');
     } else {
-        let roomNameList = new Array();
-        roomList.forEach((elem) => {
-            roomNameList.push(elem.name);
-        });
-        let userList = new Array();
-        let socketList = lobbyIO.sockets;
-        //console.log(socketList);
-        if(socketList.size > 0) {
-            socketList.forEach((value, key, map) => {
-                userList.push({
-                    id: key,
-                    username: value.request.user.username
-                });
-            });
-            console.log(userList);
-            res.render('lobby', {username: req.user.username, roomNameList: roomNameList, userList: userList});
-        }
-        else {
-            res.render('lobby', {username: req.user.username, roomNameList: roomNameList, userList: []});
-        }
-        
-        
+        res.render('lobby', {username: req.user.username});
     }
 });
 
@@ -184,7 +163,6 @@ app.get('/newroom', (req, res) => {
     if(!req.user) {
         res.redirect('/login');
     } else {
-        
         res.render('newroom');
     }
 });
@@ -218,7 +196,7 @@ app.get('/game/:roomname', (req, res) => {
                 res.redirect('/lobby');
             }
         });
-        res.render('RSPgame', {username: req.user.username, roomname: req.body.roomname});
+        res.render('RPSgame', {username: req.user.username, roomname: req.params.roomname});
     }
 });
 
@@ -261,16 +239,26 @@ lobbyIO.on('connection', (socket) => {
 
     socket.on('lobby:reqUserList', () => {
         let userList = new Array();
+        userList.push({
+            id: socket.id,
+            username: socket.request.user.username
+        });
         let socketList = lobbyIO.sockets;
         if(socketList.size > 0) {
             socketList.forEach((elem) => {
-                userList.push({
-                    id: elem.id,
-                    username: elem.request.user.username
-                });
-            });
+                if(elem != socket) {
+                    userList.push({
+                        id: elem.id,
+                        username: elem.request.user.username
+                    });
+                }
+            }); 
         }
-        socket.emit('resUserList', userList);
+        socket.emit('lobby:resUserList', userList);
+    });
+
+    socket.on('lobby:reqRoomList', () => {
+        socket.emit('lobby:resRoomList', roomList);
     });
 
     socket.on('lobby:reqUserData', (username) => {
@@ -290,7 +278,9 @@ gameIO.on('connection', (socket) => {   //연결이 들어오면 실행되는 �
         socket.join(roomname);
         roomList.forEach((elem) => {
             if(elem.name == roomname) {
-                elem.players.push(socket.request.user);
+                if(!elem.players.includes(socket.request.user.username)) {
+                    elem.players.push(socket.request.user.username);
+                }
             }
         });
         gameIO.to(socket.data.roomname).emit('message', socket.request.user.username + ' joined!!')
@@ -298,14 +288,14 @@ gameIO.on('connection', (socket) => {   //연결이 들어오면 실행되는 �
     
 
     socket.on('sendChat', (msg, username) => {
-        gameIO.emit('emitChat', msg, username);
+        gameIO.to(socket.data.roomname).emit('emitChat', msg, username);
     });
 
-    socket.on('reqInviteUser', (selectedUser) => {
-        lobbyIO.to(selectedUser).emit('sendInvite', socket.data.roomname);
+    socket.on('reqInviteUser', (id) => {
+        lobbyIO.to(id).emit('lobby:invite', socket.request.user.username, socket.data.roomname);
     });
 
-    socket.on('reqUserList', () => {
+    socket.on('reqLobbyUserList', () => {
         let userList = new Array();
         let socketList = lobbyIO.sockets;
         if(socketList.size > 0) {
@@ -314,9 +304,9 @@ gameIO.on('connection', (socket) => {   //연결이 들어오면 실행되는 �
                     id: elem.id,
                     username: elem.request.user.username
                 });
-            });
+            }); 
         }
-        socket.emit('resUserList', userList);
+        socket.emit('resLobbyUserList', userList);
     });
 });
 
