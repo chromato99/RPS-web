@@ -7,41 +7,32 @@
         text-align: center;
         /* align the New Room to the center of the page */
     }
-
+    body {
+        background-color: #DFEBF1;
+    }
+    a {
+        color: black;
+        font-size: 36px;
+    }
     </style>
 </head>
-
-
-<br><br>
-
   
-    <body bgcolor="#DFEBF1">
-    <h1 style="font-size: 50px;">RPS-web Making New Room</h1>
+<body>
+    <h1>RPS-web Making New Room</h1>
 
-    <br><br> <br><br>
-
-    &emsp;
     <img src="https://t4.ftcdn.net/jpg/00/86/16/21/240_F_86162112_uOlc958HLu91DMpNj7YxNgHdIhD5NQ78.jpg"
-    style="width: 35px;"> &nbsp;
-    <a href="/lobby" > <font size="10"  color="black"> Back</a> </font>
+    style="width: 35px;">
+    <a href="/lobby">Back</a>
     <!--when you press back button, you go back to the lobby page -->
-
-    <br><br><br>
-
+    <br>
     <form action='/newroom' method='post'> 
         <!-- align 3 images to the leftside -->
-        &emsp;
+        
         <img src="https://t4.ftcdn.net/jpg/01/37/39/61/240_F_137396146_YdMApcVRhlbLZXvzzxRnlGImQbJ6zQuO.jpg" style="height:300px;width: 250px;">
-        &emsp;<img src="https://t4.ftcdn.net/jpg/01/37/39/61/240_F_137396133_S49HfXiYBw32t0pgTG3tbP11H6Qq172J.jpg" style="height:300px;width: 250px;">
-        &emsp;<img src="https://t4.ftcdn.net/jpg/01/37/39/61/240_F_137396161_FFg2Zew8qbtvfqY9oXidLi1US231xhU2.jpg" style="height:300px;width: 250px;">
+        <img src="https://t4.ftcdn.net/jpg/01/37/39/61/240_F_137396133_S49HfXiYBw32t0pgTG3tbP11H6Qq172J.jpg" style="height:300px;width: 250px;">
+        <img src="https://t4.ftcdn.net/jpg/01/37/39/61/240_F_137396161_FFg2Zew8qbtvfqY9oXidLi1US231xhU2.jpg" style="height:300px;width: 250px;">
 
-<br><br><br><br><br>
-&emsp;&nbsp;
-        <label for="numberOfPlayers"> <font size="12" style="font-family:Arial, Helvetica, sans-serif;" color="black">
-            Choose a number of max player :</label> </font>
-
-            <!-- you can select the number of maximum player (at least 2) -->
-            &emsp;&emsp;         
+        <br>     
         <select name="max" id="numberOfPlayers" style="width: 70px; height: 48px; font-size: 25px;">
             <option value="2">2</option>
             <option value="3">3</option>

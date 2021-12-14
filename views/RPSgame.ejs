@@ -50,7 +50,7 @@
 </head>
 <body>
     <h1>RPS-web Game Room</h1>
-    <div style="float: left; width: 360px;">
+    <div style="float: left; width: 360px; margin-bottom: 20px;">
         <div>
             <table id="usertable" style="float: left; width: 100%;">
                 <tr>
@@ -76,13 +76,13 @@
         <button id="backbtn" onclick="closeGame()" style="float: none; height: 100px; width: 49%;">Back to Lobby</button>
     </div>
     <div style="float: left;">
-        <textarea id="chatarea" style="width: 360px; height: 500px;"></textarea>
+        <textarea id="chatarea" onfocus="javascript:blur();" style="width: 360px; height: 500px;"></textarea>
         <form id="chatform">
-            <input id="chatinput" autocomplete="off" type="text">
+            <input id="chatinput" autocomplete="off" type="text" required>
             <button type="submit">Send</button>
         </form>
     </div>
-    <div style="float: left;" style="margin-left: 20px; margin-top: 20px;">
+    <div style="float: left; margin-left: 20px; margin-top: 20px;">
         <button id="showbtn" onclick="showLobbyUserList()">Show User List</button>
         <ul id="userlist" style="display: none;">
             

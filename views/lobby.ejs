@@ -249,7 +249,7 @@
                     style="width: 98%; height: 500px; cursor: default; "></textarea>
                     <!-- chatting input -->
                 <form id="chatForm">
-                    <input id="chatInput" autocomplete="off" type="text" style="width: 87%">
+                    <input id="chatInput" autocomplete="off" type="text" style="width: 87%" required>
                     <button type="submit">Send</button>
                 </form>
             </div>
@@ -358,12 +358,12 @@
             var userList = document.getElementById('userlist');
             userList.innerHTML = '';
             userList.innerHTML += `
-            <li >${data[0].username}&nbsp &nbsp &nbsp &nbsp<button onclick="getUserData('${data[0].username}')" >Show Data</button></li>
+            <li style="margin-top: 5px; margin-bottom: 5px;">${data[0].username}&nbsp;&nbsp;&nbsp;<button onclick="getUserData('${data[0].username}')" style="display: inline-block;">Show Data</button></li>
             `;
             data.shift();
             data.forEach((elem) => {
                 userList.innerHTML += `
-                <li >${elem.username}&nbsp &nbsp &nbsp &nbsp<button onclick="getUserData('${elem.username}')" >Show Data</button>&nbsp<button onclick="whisper('${elem.username}')" >Whisper</button></li>
+                <li style="margin-top: 5px; margin-bottom: 5px;">${elem.username}&nbsp;&nbsp;&nbsp;<button onclick="getUserData('${elem.username}')" style="display: inline-block;">Show Data</button>&nbsp;&nbsp;<button onclick="whisper('${elem.username}')" style="display: inline-block;">Whisper</button></li>
                 `;
             });
         });
