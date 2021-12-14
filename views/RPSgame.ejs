@@ -49,9 +49,9 @@
     <script src="/socket.io/socket.io.js"></script>
     <script>
         var inputname = "<%= username %>"; // 유저 이름 입력 받기
-        var tablename = "<%= tablename %>";
+        var roomname = "<%= roomname %>";
         var socket = io('/game');
-        socket.emit('newPlayer', tablename);
+        socket.emit('newPlayer', roomname);
         var player = {};
 
         var rock = document.getElementById('rock');

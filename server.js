@@ -15,14 +15,12 @@ let ejs = require('ejs');
 let mysql = require('mysql');
 let io = require('socket.io')(server);
 let poker = require('pokersolver').Hand;
-let card = require('./src/card');
-// let Table = require('./src/table');
 const db_config = require('./src/db-config');
 let bodyParser = require('body-parser');
 const { SocketAddress } = require('net');
 const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
 
-let tableList = new Array();
+let roomList = new Array();
 
 
 app.set('view engine', 'ejs'); // 렌더링 엔진 모드를 ejs로 설정
@@ -155,9 +153,9 @@ app.get('/lobby', (req, res) => {
     if(!req.user) {
         res.redirect('/login');
     } else {
-        let tableNameList = new Array();
-        tableList.forEach((elem) => {
-            tableNameList.push(elem.name);
+        let roomNameList = new Array();
+        roomList.forEach((elem) => {
+            roomNameList.push(elem.name);
         });
         let userList = new Array();
         let socketList = lobbyIO.sockets;
@@ -170,49 +168,49 @@ app.get('/lobby', (req, res) => {
                 });
             });
             console.log(userList);
-            res.render('lobby', {username: req.user.username, tableNameList: tableNameList, userList: userList});
+            res.render('lobby', {username: req.user.username, roomNameList: roomNameList, userList: userList});
         }
         else {
-            res.render('lobby', {username: req.user.username, tableNameList: tableNameList, userList: []});
+            res.render('lobby', {username: req.user.username, roomNameList: roomNameList, userList: []});
         }
         
         
     }
 });
 
-app.get('/newtable', (req, res) => {
+app.get('/newroom', (req, res) => {
     if(!req.user) {
         res.redirect('/login');
     } else {
         
-        res.render('newTable');
+        res.render('newroom');
     }
 });
 
-app.post('/newtable', (req, res) => {
+app.post('/newroom', (req, res) => {
     if(!req.user) {
         res.redirect('/login');
     } else {
-        tableList.forEach((elem) => {
-            if(elem.name == req.body.tablename) {
-                res.redirect('/newtable');
+        roomList.forEach((elem) => {
+            if(elem.name == req.body.roomname) {
+                res.redirect('/newroom');
             }
         });
         let table = {
             name: '',
             players: new Array(),
         };
-        tableList.push(table);
+        roomList.push(table);
         
-        res.redirect('/game/' + req.body.tablename);
+        res.redirect('/game/' + req.body.roomname);
     }
 });
 
-app.get('/game/:tableName', (req, res) => {
+app.get('/game/:roomname', (req, res) => {
     if(!req.user) {
         res.redirect('/login');
     } else {
-        res.render('RSPgame', {username: req.user.username, tablename: req.body.tablename});
+        res.render('RSPgame', {username: req.user.username, roomname: req.body.roomname});
     }
 });
 
@@ -263,15 +261,15 @@ lobbyIO.on('connection', (socket) => {
 
 gameIO.on('connection', (socket) => {   //연결이 들어오면 실행되는 이벤트
     // socket 변수에는 실행 시점에 연결한 상대와 연결된 소켓의 객체가 들어있다.
-    socket.on('newPlayer', (tablename) => {
-        socket.data.tablename = tablename;
-        socket.join(tablename);
-        tableList.forEach((elem) => {
-            if(elem.name == tablename) {
+    socket.on('newPlayer', (roomname) => {
+        socket.data.roomname = roomname;
+        socket.join(roomname);
+        roomList.forEach((elem) => {
+            if(elem.name == roomname) {
                 elem.players.push(socket.request.user);
             }
         });
-        gameIO.to(socket.data.tablename).emit('message', socket.request.user.username + ' joined!!')
+        gameIO.to(socket.data.roomname).emit('message', socket.request.user.username + ' joined!!')
     });
     
 
@@ -280,7 +278,7 @@ gameIO.on('connection', (socket) => {   //연결이 들어오면 실행되는 �
     });
 
     socket.on('reqInviteUser', (selectedUser) => {
-        lobbyIO.to(selectedUser).emit('sendInvite', socket.data.tableName);
+        lobbyIO.to(selectedUser).emit('sendInvite', socket.data.roomname);
     });
 
     socket.on('reqUserList', () => {

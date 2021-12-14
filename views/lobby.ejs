@@ -13,10 +13,10 @@
     <h1>Welcome to Lobby</h1>
     <div style="float: left; width: 35%;">
         <a href="/logout">Logout</a>
-        <a href="/newtable">Make New Table</a>
+        <a href="/newroom">Make New Room</a>
         <ul id="roomlist" type="none">
-            <% for(let i = 0; i < tableNameList.length; i++) { %> 
-                <li class = 'source' id = <%= i %> ><a href="/game/<%= tableNameList[i].name %>"><%= tableNameList[i].name %> </a></li>
+            <% for(let i = 0; i < roomNameList.length; i++) { %> 
+                <li class = 'source' id = <%= i %> ><%= roomNameList[i].name %><a href="/game/<%= roomNameList[i].name %>">Join</a></li>
             <% } %> 
         </ul>
     </div>
