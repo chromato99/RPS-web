@@ -43,27 +43,37 @@
         }
         td.status{
             height: 100px;
-            width: 90px;
+            width: 100px;
         }
+        
     </style>
 </head>
 <body>
-    <button onclick="closeGame()">Back</button>
-    <div style="float: left; width: 45%;">
+    <h1>RPS-web Game Room</h1>
+    <div style="float: left; width: 400px;">
         <div>
-            <table id="usertable" style="float: left; height: 600px; width: 100%;">
+            <table id="usertable" style="float: left; width: 100%;">
                 <tr>
                 <% for(let i = 0; i < room.max_player_count; i++) { %>
                     <% if(i == 4) { %> 
                     </tr><tr>
                     <% } %> 
                     <td id="<%= i %>">
+                        <table>
+                            <tr>
+                                <td class="status">Empty</td>
+                            </tr>
+                            <tr>
+                                <td class="status"></td>
+                            </tr>
+                        </table>
                     </td>
                 <% } %> 
                 </tr>
             </table>
         </div><br>
-        <button id="readybtn" onclick="setReady()" style="float: none; height: 100px; width: 200px;">ready</button>
+        <button id="readybtn" onclick="setReady()" style="float: none; height: 100px; width: 49%;">Ready Game</button>
+        <button id="backbtn" onclick="closeGame()" style="float: none; height: 100px; width: 49%;">Back to Lobby</button>
     </div>
     <div style="float: left;">
         <textarea id="chatarea" style="width: 400px; height: 500px;"></textarea>
@@ -72,8 +82,8 @@
             <button type="submit">Send</button>
         </form>
     </div>
-    <div style="float: left;">
-        <button onclick="showLobbyUserList()">Show User List</button>
+    <div style="float: left;" style="margin-left: 20px; margin-top: 20px;">
+        <button id="showbtn" onclick="showLobbyUserList()">Show User List</button>
         <ul id="userlist" style="display: none;">
             
         </ul>
@@ -109,6 +119,10 @@
             }
         }
 
+        function closeModal() {
+            modal.style.display = 'none';
+        }
+
         function closeGame() {
             modal.style.display = 'none';
             socket.disconnect();
@@ -124,7 +138,7 @@
 
         function setReady() {
             let readybtn = document.getElementById('readybtn');
-            readybtn.style.display = 'none';
+            readybtn.disabled = true;
             socket.emit('ready');
         }
 
@@ -144,6 +158,8 @@
         }
 
         socket.on('gameStarted', (data) => { // 게임 시작됩을 알려주는 응답
+            let showbtn = document.getElementById('showbtn');
+            showbtn.style.display = 'none';
             let insideModal = document.getElementById('insideModal');
             modal.style.display = 'block';
             insideModal.innerHTML = `
@@ -157,16 +173,21 @@
 
         socket.on('draw', () => {
             let insideModal = document.getElementById('insideModal');
+            let chatarea = document.getElementById('chatarea');
+            chatarea.append("\n" + 'Game Ended');
+
             modal.style.display = 'block';
             insideModal.innerHTML = `
                 <h2>You Draw</h2>
+                <button onclick="closeModal()">Show Results</button>
                 <button onclick="closeGame()">Back To Lobby</button>
             `;
         });
 
         socket.on('winloss', (players, winSelection) => {
             let insideModal = document.getElementById('insideModal');
-            
+            let chatarea = document.getElementById('chatarea');
+            chatarea.append("\n" + 'Game Ended');
 
             let player;
             players.forEach((elem) => {
@@ -174,14 +195,17 @@
                     player = elem;
                 }
             });
+
             if(player.selection == winSelection) {
                 insideModal.innerHTML = `
                     <h2>You Win!!</h2>
+                    <button onclick="closeModal()">Show Results</button>
                     <button onclick="closeGame()">Back To Lobby</button>
                 `;
             } else {
                 insideModal.innerHTML = `
                     <h2>You Lose T.T</h2>
+                    <button onclick="closeModal()">Show Results</button>
                     <button onclick="closeGame()">Back To Lobby</button>
                 `;
             }
@@ -220,7 +244,7 @@
             userList.innerHTML = '';
             data.forEach((elem) => {
                 userList.innerHTML += `
-                <li >${elem.username}<button onclick="getUserData('${elem.username}')" >Show Data</button><button id="${elem.id}" onclick="invite('${elem.id}')" >Invite</button></li>
+                <li >${elem.username}<button id="${elem.id}" onclick="invite('${elem.id}')" >Invite</button></li>
                 `;
             });
         });
@@ -232,7 +256,7 @@
             e.preventDefault();
             let chatinput = document.getElementById('chatinput');
 
-            // socket.emit으로 서버에 신호를 전달
+            // socket.emit으로 서버에 채팅 전달
             socket.emit('sendChat', chatinput.value, username);
 
             chatinput.value = "";

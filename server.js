@@ -14,9 +14,8 @@ let LocalStrategy = require('passport-local').Strategy;
 let ejs = require('ejs');
 let mysql = require('mysql');
 let io = require('socket.io')(server);
-let poker = require('pokersolver').Hand;
 const db_config = require('./src/db-config');
-let bodyParser = require('body-parser');
+const bodyParser = require('body-parser');
 const { SocketAddress } = require('net');
 const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
 
@@ -42,6 +41,8 @@ app.use(session({
 app.use(passport.initialize());
 app.use(passport.session());
 
+
+// Passport.js setting
 passport.use(new LocalStrategy(
     function(username, password, done) {
     db.query('SELECT * FROM user WHERE username=?', [username], (err, results) => {
@@ -78,6 +79,7 @@ passport.deserializeUser(function(username, done) {
     });
 });
 
+// Socket IO namespace setting
 
 let lobbyIO = io.of('/lobby');
 
@@ -91,6 +93,8 @@ let gameIO = io.of('/game');
 gameIO.use(wrap(session({ secret: "!@#$%^&*", store: new MySQLStore(db_config), resave: false, saveUninitialized: false })));
 gameIO.use(wrap(passport.initialize()));
 gameIO.use(wrap(passport.session()));
+
+// Express.js get,post request code
 
 app.get('/', (req, res) => {
     if(!req.user) {
@@ -212,6 +216,8 @@ app.get('/game/:roomname', (req, res) => {
     }
 });
 
+// Lobby Socket IO Code
+
 
 lobbyIO.use((socket, next) => {
     if (socket.request.user) {
@@ -282,6 +288,9 @@ lobbyIO.on('connection', (socket) => {
     socket.on('disconnect', (reason) => {
     });
 });
+
+
+// Game Socket IO Code
 
 function updateDraw(userList) {
     userList.forEach((elem) => {
