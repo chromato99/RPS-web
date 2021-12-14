@@ -10,21 +10,35 @@
     </style>
 </head>
 <body>
-    <div style="float: left; width: 50%;">
+    <h1>Welcome to Lobby</h1>
+    <div style="float: left; width: 35%;">
         <a href="/logout">Logout</a>
-        <a href="/newtable">Make New Room</a>
+        <a href="/newtable">Make New Table</a>
         <ul id="roomlist" type="none">
-            <% for(let i = 0; i < list.length; i++) { %> 
-                <li class = 'source' id = <%= i %> ><a href="/game/<%= list[i].name %>"><%= list[i].name %> </a></li>
+            <% for(let i = 0; i < tableNameList.length; i++) { %> 
+                <li class = 'source' id = <%= i %> ><a href="/game/<%= tableNameList[i].name %>"><%= tableNameList[i].name %> </a></li>
             <% } %> 
         </ul>
     </div>
     <div style="float: left;">
-        <textarea id="chatarea" onfocus="javascript:blur();" style="width: 400px; height: 600px; cursor: default;"></textarea>
-        <form id="chatform">
-            <input id="chatinput" autocomplete="off" type="text">
-            <button type="submit">Send</button>
-        </form>
+        <div style="float: left;">
+            <textarea id="chatArea" onfocus="javascript:blur();" style="width: 400px; height: 600px; cursor: default;"></textarea>
+            <form id="chatForm">
+                <input id="chatInput" autocomplete="off" type="text">
+                <button type="submit">Send</button>
+            </form>
+        </div>
+        <div style="float: left;">
+            <select id="userList" style="width: 300px; height: 600px; display: block;" multiple>
+                <% for(let i = 0; i < userList.length; i++) { %> 
+                    <option value="<%= userList[i].id %>"><%= userList[i].username %></option>
+                <% } %>
+            </select>
+            <form id="whisperForm">
+                <input id="whisperInput" autocomplete="off" type="text">
+                <button type="submit">Send Whisper</button>
+            </form>
+        </div>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
@@ -33,23 +47,46 @@
         var socket = io('/lobby');
         socket.emit('lobby:newplayer', inputname);
 
-        var chatform = document.getElementById('chatform');
+        var chatForm = document.getElementById('chatForm');
+        var whisperForm = document.getElementById('whisperForm');
 
-        socket.on('lobby:chatemit', (msg, username) => {
-            var chatarea = document.getElementById('chatarea');
-            chatarea.append("\n" + username + " : " + msg);
+        socket.on('lobby:emitChat', (msg, username) => {
+            var chatArea = document.getElementById('chatArea');
+            chatArea.append("\n" + username + " : " + msg);
         });
 
+        socket.on('lobby:resUserList', (data) => {
+            var userList = document.getElementById('userList');
+            userList.innerHTML = '';
+            userList.forEach((elem) => {
+                userList.innerHTML += `<option value="${elem.id}">${elem.username}</option>`;
+            });
+        });
 
-
-        chatform.onsubmit = (e) => {
+        chatForm.onsubmit = (e) => {
             e.preventDefault();
-            var chatinput = document.getElementById('chatinput');
+            var chatInput = document.getElementById('chatInput');
 
             // socket.emit으로 서버에 신호를 전달
-            socket.emit('lobby:chatsend', chatinput.value, inputname);
+            socket.emit('lobby:sendChat', chatInput.value, inputname);
 
-            chatinput.value = "";
+            chatInput.value = "";
+        };
+
+        whisperForm.onsubmit = (e) => {
+            e.preventDefault();
+            let whisperInput = document.getElementById('whisperInput');
+            let userList = document.getElementById('userList').options;
+            let selectedUserList = new Array();
+            for(let i = 0; userList.length; i++) {
+                if(userList[i].selected) {
+                    selectedUserList.push(userList[i].value);
+                }
+            }
+            // socket.emit으로 서버에 신호를 전달
+            socket.emit('lobby:sendWhisper', whisperInput.value, selectedUserList);
+
+            whisperInput.value = "";
         };
     </script>
 </body>

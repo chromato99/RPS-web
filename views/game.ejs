@@ -43,6 +43,13 @@
             <input id="chatinput" autocomplete="off" type="text">
             <button type="submit">Send</button>
         </form>
+        <form id="inviteform">
+            <button type="submit">Invite</button>
+        </form>
+        <form id="invitelist" style="display: none;">
+            <select multiple id="userlist" name="userlist"></select>
+            <button type="submit">Invite</button>
+        </form>
     </div>
     
     
@@ -59,6 +66,9 @@
         var callform = document.getElementById('callform');
         var foldform = document.getElementById('foldform');
         var chatform = document.getElementById('chatform');
+        var inviteform = document.getElementById('inviteform');
+        var invitelist = document.getElementById('invitelist');
+
 
         // socket.on 함수로 서버에서 전달하는 신호를 수신
         socket.on('setStatus', (data) => {
@@ -91,7 +101,7 @@
                 messageTag.innerText = "You are BB";
                 messageList.appendChild(messageTag);
             }
-            socket.emit('getPlayerData');
+            socket.emit('reqGameData');
         });
 
         socket.on('playerCount', (data) => {
@@ -99,7 +109,14 @@
             userCounter.innerText = "Player count : " + data;
         });
 
-        socket.on('updateData', (data, table) => {
+        socket.on('resUserList', (data) => {
+            var userList = document.getElementById('userlist');
+            userList.forEach((elem) => {
+                userList.innerHTML += `<option value="${elem.id}">${elem.username}</option>`;
+            });
+        });
+
+        socket.on('resGameData', (data, table) => {
             player = JSON.parse(JSON.stringify(data)); // 응답받은 플레이어 데이터 깊은 복사
             var userChip = document.getElementById('userchip');
             userChip.innerText = "Chips : " + player.chip;
@@ -143,14 +160,35 @@
             var messageTag = document.createElement("li");
             messageTag.innerText = msg;
             messageList.appendChild(messageTag);
-            socket.emit('getPlayerData');
+            socket.emit('reqGameData');
         });
 
-        socket.on('chatemit', (msg, username) => {
+        socket.on('emitChat', (msg, username) => {
             var chatarea = document.getElementById('chatarea');
             chatarea.append("\n" + username + " : " + msg);
         });
 
+        inviteform.onsubmit = (e) => {
+            e.preventDefault();
+            var invitelist = document.getElementById('invitelist');
+            document.getElementById('invitelist').style.display = "block";
+            socket.emit('reqUserList');
+        }
+
+        invitelist.onsubmit = (e) => {
+            e.preventDefault();
+            let invitelist = document.getElementById('invitelist');
+            document.getElementById('invitelist').style.display = "none";
+            let userlist = document.getElementById('userlist');
+            let selectedUserList = new Array();
+            userlist.forEach((elem) => {
+                if(elem.selected) {
+                    selectedUserList.push(elem.value);
+                }
+            });
+
+            socket.emit('reqInviteUser', selectedUserList);
+        }
 
 
         chatform.onsubmit = (e) => {
@@ -158,7 +196,7 @@
             var chatinput = document.getElementById('chatinput');
 
             // socket.emit으로 서버에 신호를 전달
-            socket.emit('chatsend', chatinput.value, player.username);
+            socket.emit('sendChat', chatinput.value, player.username);
 
             chatinput.value = "";
         };

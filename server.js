@@ -16,9 +16,10 @@ let mysql = require('mysql');
 let io = require('socket.io')(server);
 let poker = require('pokersolver').Hand;
 let card = require('./src/card');
-let Table = require('./src/table');
+// let Table = require('./src/table');
 const db_config = require('./src/db-config');
 let bodyParser = require('body-parser');
+const { SocketAddress } = require('net');
 const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
 
 let tableList = new Array();
@@ -77,6 +78,20 @@ passport.deserializeUser(function(username, done) {
     return done(null, results[0]);
     });
 });
+
+
+let lobbyIO = io.of('/lobby');
+
+lobbyIO.use(wrap(session({ secret: "!@#$%^&*", store: new MySQLStore(db_config), resave: false, saveUninitialized: false })));
+lobbyIO.use(wrap(passport.initialize()));
+lobbyIO.use(wrap(passport.session()));
+
+
+let gameIO = io.of('/game');
+
+gameIO.use(wrap(session({ secret: "!@#$%^&*", store: new MySQLStore(db_config), resave: false, saveUninitialized: false })));
+gameIO.use(wrap(passport.initialize()));
+gameIO.use(wrap(passport.session()));
 
 app.get('/', (req, res) => {
     if(!req.user) {
@@ -140,11 +155,28 @@ app.get('/lobby', (req, res) => {
     if(!req.user) {
         res.redirect('/login');
     } else {
-        let list = new Array();
+        let tableNameList = new Array();
         tableList.forEach((elem) => {
-            list.push(elem.name);
+            tableNameList.push(elem.name);
         });
-        res.render('lobby', {username: req.user.username, list: list});
+        let userList = new Array();
+        let socketList = lobbyIO.sockets;
+        //console.log(socketList);
+        if(socketList.size > 0) {
+            socketList.forEach((value, key, map) => {
+                userList.push({
+                    id: key,
+                    username: value.request.user.username
+                });
+            });
+            console.log(userList);
+            res.render('lobby', {username: req.user.username, tableNameList: tableNameList, userList: userList});
+        }
+        else {
+            res.render('lobby', {username: req.user.username, tableNameList: tableNameList, userList: []});
+        }
+        
+        
     }
 });
 
@@ -152,6 +184,7 @@ app.get('/newtable', (req, res) => {
     if(!req.user) {
         res.redirect('/login');
     } else {
+        
         res.render('newTable');
     }
 });
@@ -165,26 +198,25 @@ app.post('/newtable', (req, res) => {
                 res.redirect('/newtable');
             }
         });
-        let table = new Table();
+        let table = {
+            name: '',
+            players: new Array(),
+        };
         tableList.push(table);
         
         res.redirect('/game/' + req.body.tablename);
     }
 });
 
-app.get('/game/:roomName', (req, res) => {
+app.get('/game/:tableName', (req, res) => {
     if(!req.user) {
         res.redirect('/login');
     } else {
-        res.render('game', {username: req.user.username});
+        res.render('RSPgame', {username: req.user.username, tablename: req.body.tablename});
     }
 });
 
-let lobbyIO = io.of('/lobby');
 
-lobbyIO.use(wrap(session({ secret: "!@#$%^&*", store: new MySQLStore(db_config), resave: false, saveUninitialized: false })));
-lobbyIO.use(wrap(passport.initialize()));
-lobbyIO.use(wrap(passport.session()));
 
 lobbyIO.use((socket, next) => {
     if (socket.request.user) {
@@ -201,75 +233,121 @@ lobbyIO.on('connection', (socket) => {
         lobbyIO.emit('lobby:chatemit', 'Joined Lobby!!', socket.request.user.username);
     });
 
-    socket.on('lobby:chatsend', (msg, username) => {
+    socket.on('lobby:sendChat', (msg, username) => {
         console.log('lobbyIO(' + socket.request.user.username + ') : ' + msg);
-        lobbyIO.emit('lobby:chatemit', msg, socket.request.user.username);
+        lobbyIO.emit('lobby:emitChat', msg, socket.request.user.username);
     });
+
+    socket.on('lobby:sendWhisper', (msg, userList) => {
+        userList.forEach((elem) => {
+            lobbyIO.to(elem).emit('lobby:emitChat', "(Whisper)" + msg, socket.request.user.username);
+        });
+    });
+
+    socket.on('reqUserList', () => {
+        let userList = new Array();
+        let socketList = lobbyIO.sockets;
+        if(socketList.legth > 0) {
+            socketList.forEach((elem) => {
+                userList.push({
+                    id: elem.id,
+                    username: elem.request.user.username
+                });
+            });
+        }
+        socket.emit('resUserList', userList);
+    });
+
 });
 
-let gameIO = io.of('/game');
-
-gameIO.use(wrap(session({ secret: "!@#$%^&*", store: new MySQLStore(db_config), resave: false, saveUninitialized: false })));
-gameIO.use(wrap(passport.initialize()));
-gameIO.use(wrap(passport.session()));
 
 gameIO.on('connection', (socket) => {   //연결이 들어오면 실행되는 이벤트
     // socket 변수에는 실행 시점에 연결한 상대와 연결된 소켓의 객체가 들어있다.
-    socket.data.player = {
-        username: socket.request.user.username,
-        chip: 1000,
-        hand: new Array(), // 현재 패
-        currentBet: 0,  // 현재 라운드에서 얼마 베팅 했는지
-        folded: false,
-        allIn: false,
-        status: false, // 현재 라운드에서 행동 했는지 확인
-        pos: 0 // table.players 배열에서의 위치
-    }
-    table.players.push(socket.data.player);
-    socket.data.player.pos = table.players.indexOf(socket.data.player);
+    socket.on('newPlayer', (tablename) => {
+        socket.data.tablename = tablename;
+        socket.join(tablename);
+        tableList.forEach((elem) => {
+            if(elem.name == tablename) {
+                elem.players.push(socket.request.user);
+            }
+        });
+        gameIO.to(socket.data.tablename).emit('message', socket.request.user.username + ' joined!!')
+    });
     
-    socket.on('newplayer',(msg) => { // 새로운 플레이어 입장
-        socket.emit('setStatus', {playerCount: gameIO.engine.clientsCount,player: socket.data.player}); // 새로운 플레이어 정보 설정
+
+    socket.on('sendChat', (msg, username) => {
+        gameIO.emit('emitChat', msg, username);
+    });
+
+    socket.on('reqInviteUser', (selectedUser) => {
+        lobbyIO.to(selectedUser).emit('sendInvite', socket.data.tableName);
+    });
+
+    socket.on('reqUserList', () => {
+        let userList = new Array();
+        let socketList = lobbyIO.sockets;
+        if(socketList.legth > 0) {
+            socketList.forEach((elem) => {
+                userList.push({
+                    id: elem.id,
+                    username: elem.request.user.username
+                });
+            });
+        }
+        socket.emit('resUserList', userList);
+    });
+
+    // socket.data.player = {
+    //     username: socket.request.user.username,
+    //     chip: 1000,
+    //     hand: new Array(), // 현재 패
+    //     currentBet: 0,  // 현재 라운드에서 얼마 베팅 했는지
+    //     folded: false,
+    //     allIn: false,
+    //     status: false, // 현재 라운드에서 행동 했는지 확인
+    //     pos: 0 // table.players 배열에서의 위치
+    // }
+    // table.players.push(socket.data.player);
+    // socket.data.player.pos = table.players.indexOf(socket.data.player);
+    
+    // socket.on('newplayer',(msg) => { // 새로운 플레이어 입장
+    //     socket.emit('setStatus', {playerCount: gameIO.fetchSockets().length,player: socket.data.player}); // 새로운 플레이어 정보 설정
         
-        if(gameIO.engine.clientsCount > 1) { // 3명 이상 입장시 자동 게임 시작
-            console.log('Start Game!');
-            table.startGame(); // 게임 시작
-            console.log(table);
-            gameIO.emit('startGame', {currentPlayer: table.currentPlayer, dealer: table.dealer, SB: table.SB, BB: table.BB});
-        }
-    });
+    //     if(gameIO.fetchSockets().length > 1) { // 3명 이상 입장시 자동 게임 시작
+    //         console.log('Start Game!');
+    //         table.startGame(); // 게임 시작
+    //         console.log(table);
+    //         gameIO.emit('startGame', {currentPlayer: table.currentPlayer, dealer: table.dealer, SB: table.SB, BB: table.BB});
+    //     }
+    // });
 
-    socket.on('getPlayerData', (msg) => { // 각 연결된 소켓들이 데이터 전송을 받기 위한 요청
-        //console.log(socket.data.player);
-        socket.emit('updateData', socket.data.player, {board: table.board, currentPlayer: table.currentPlayer, pot: table.pot, round: table.round});
-    });
+    // socket.on('reqGameData', (msg) => { // 각 연결된 소켓들이 데이터 전송을 받기 위한 요청
+    //     //console.log(socket.data.player);
+    //     socket.emit('resGameData', socket.data.player, {board: table.board, currentPlayer: table.currentPlayer, pot: table.pot, round: table.round});
+    // });
 
-    socket.on('chatsend', (msg, username) => {
-        gameIO.emit('chatemit', msg, username);
-    });
-
-    socket.on('bet', (msg) => {
-        console.log(socket.data.player);
-        table.bet(socket.data.player, msg);
-        if(socket.data.player.allIn == true) { // 플레이어가 올인 했을시
-            gameIO.emit('message', socket.data.player.username + " All In!!!");
-        } else {
-            gameIO.emit('message', socket.data.player.username + " bet " + msg);
-        }
-    });
-    socket.on('check', (msg) => {
-        table.call(socket.data.player);
-        //table.check(socket.data.player);
-        gameIO.emit('message', socket.data.player.username + " check");
-    });
-    socket.on('call', (msg) => {
-        table.call(socket.data.player);
-        gameIO.emit('message', socket.data.player.username + " call");
-    });
-    socket.on('fold', (msg) => {
-        table.fold(socket.data.player);
-        gameIO.emit('message', socket.data.player.username + " fold");
-    });
+    // socket.on('bet', (msg) => {
+    //     console.log(socket.data.player);
+    //     table.bet(socket.data.player, msg);
+    //     if(socket.data.player.allIn == true) { // 플레이어가 올인 했을시
+    //         gameIO.emit('message', socket.data.player.username + " All In!!!");
+    //     } else {
+    //         gameIO.emit('message', socket.data.player.username + " bet " + msg);
+    //     }
+    // });
+    // socket.on('check', (msg) => {
+    //     table.call(socket.data.player);
+    //     //table.check(socket.data.player);
+    //     gameIO.emit('message', socket.data.player.username + " check");
+    // });
+    // socket.on('call', (msg) => {
+    //     table.call(socket.data.player);
+    //     gameIO.emit('message', socket.data.player.username + " call");
+    // });
+    // socket.on('fold', (msg) => {
+    //     table.fold(socket.data.player);
+    //     gameIO.emit('message', socket.data.player.username + " fold");
+    // });
 });
 
 server.listen(port, function() {

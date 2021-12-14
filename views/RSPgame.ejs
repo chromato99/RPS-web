@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Socket.IO 예제</title>
+</head>
+<body>
+    <div style="float: left; width: 50%;">
+        
+        <ul id="messages" type="none">
+            
+        </ul>
+    
+        <div id = "control" style="display: none;">
+            <form id="rock">
+                <button type="submit">rock</button>
+            </form>
+            
+            <form id="scissor">
+                <button type="submit">scissor</button>
+            </form>
+    
+            <form id="paper">
+                <button type="submit">paper</button>
+            </form>
+        
+            <form id="ready">
+                <button type="submit">ready</button>
+            </form>
+        </div>
+    </div>
+    <div style="float: left;">
+        <textarea id="chatarea" style="width: 400px; height: 500px;"></textarea>
+        <form id="chatform">
+            <input id="chatinput" autocomplete="off" type="text">
+            <button type="submit">Send</button>
+        </form>
+        <form id="inviteform">
+            <button type="submit">Invite</button>
+        </form>
+        <form id="invitelist" style="display: none;">
+            <select multiple id="userlist" name="userlist" style="width: 400px; height: 400px;"></select>
+            <button type="submit">Invite</button>
+        </form>
+    </div>
+    
+    
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+        var inputname = "<%= username %>"; // 유저 이름 입력 받기
+        var tablename = "<%= tablename %>";
+        var socket = io('/game');
+        socket.emit('newPlayer', tablename);
+        var player = {};
+
+        var rock = document.getElementById('rock');
+        var scissor = document.getElementById('scissor');
+        var paper = document.getElementById('paper');
+        var ready = document.getElementById('ready');
+        var chatform = document.getElementById('chatform');
+        var inviteform = document.getElementById('inviteform');
+        var invitelist = document.getElementById('invitelist');
+
+        socket.on('startGame', (data) => { // 게임 시작됩을 알려주는 응답
+            
+            socket.emit('reqGameData');
+        });
+
+        // 메시지 수신시 HTML에 메시지 내용 작성
+        socket.on('message', (msg) => {
+            var messageList = document.getElementById('messages');
+            var messageTag = document.createElement("li");
+            messageTag.innerText = msg;
+            messageList.appendChild(messageTag);
+            socket.emit('reqGameData');
+        });
+
+        socket.on('emitChat', (msg, username) => {
+            var chatarea = document.getElementById('chatarea');
+            chatarea.append("\n" + username + " : " + msg);
+        });
+
+        
+        socket.on('resUserList', (data) => {
+            var userList = document.getElementById('userlist');
+            userList.forEach((elem) => {
+                userList.innerHTML += `<option value="${elem.id}">${elem.username}</option>`;
+            });
+        });
+
+        inviteform.onsubmit = (e) => {
+            e.preventDefault();
+            var invitelist = document.getElementById('invitelist');
+            if(document.getElementById('invitelist').style.display == 'none') {
+                document.getElementById('invitelist').style.display = "block";
+                socket.emit('reqUserList');
+            } else {
+                document.getElementById('invitelist').style.display = "none";
+            }
+            
+        }
+
+        invitelist.onsubmit = (e) => {
+            e.preventDefault();
+            let invitelist = document.getElementById('invitelist');
+            document.getElementById('invitelist').style.display = "none";
+            let userlist = document.getElementById('userlist');
+            let selectedUserList = new Array();
+            userlist.forEach((elem) => {
+                if(elem.selected) {
+                    selectedUserList.push(elem.value);
+                }
+            });
+
+            socket.emit('reqInviteUser', selectedUserList);
+        }
+    </script>
+</body>
+</html>
