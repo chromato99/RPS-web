@@ -37,7 +37,10 @@ app.use(session({ // Session settings
     secret: '!@#$%^&*',
     store: new MySQLStore(db_config),
     resave: false,
-    saveUninitialized: false
+    saveUninitialized: false,
+    cookie: {
+        maxAge: 6000 * 60 * 60 // 쿠키 유효기간 6시간
+    }
 }));
 app.use(passport.initialize()); // passport.js initialization
 app.use(passport.session());
@@ -162,9 +165,9 @@ app.post('/signup', (req, res) => { // Sign Up request
     console.log(res.body)
     db.query('SELECT * FROM user WHERE username=?', [req.body.username], (err, results) => {
         if(err)
-            res.render('signup', {message: 'input sign up data'});
+            res.render('signup', {message: 'Please input sign up data'});
         if(!!results[0])
-            res.render('signup', {message: 'Already existing username'});
+            res.render('signup', {message: 'Already existing username!!'});
         else {
             // Encrypting password with random salt and inserting new user data in database
             const randomSalt = crypto.randomBytes(32).toString("hex");
@@ -240,7 +243,6 @@ app.get('/game/:roomname', (req, res) => { // Entering game room
         } else {
             res.render('RPSgame', {username: req.user.username, roomname: req.params.roomname, room: room});
         }
-        
     }
 });
 
