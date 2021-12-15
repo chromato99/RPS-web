@@ -10,7 +10,17 @@
             /* align the New Room to the center of the page */
         }
         body {
+            text-align: center;
             background-color: #DFEBF1;
+        }
+        div.top {
+            width: 100%;
+            /* style for text */
+            border-bottom-style: solid;
+            border-bottom-width: 4px;
+            border-bottom-color: rgb(210, 156, 226);
+            text-shadow: 2px 2px 2px rgb(71, 109, 214);
+
         }
         a {
             color: black;
@@ -24,18 +34,22 @@
 </head>
   
 <body>
-    <h1>RPS-web Making New Room</h1>
+    <div class="top">
+        <h1>RPS-web Making New Room</h1>
+    </div>
+    <div style="display: inline-block; text-align: left;"></div>
 
     <img src="https://t4.ftcdn.net/jpg/00/86/16/21/240_F_86162112_uOlc958HLu91DMpNj7YxNgHdIhD5NQ78.jpg" style="width: 35px;">
     <a href="/lobby">Back</a>
     <!--when you press back button, you go back to the lobby page -->
     <br>
+    
     <form action='/newroom' method='post'> 
         <!-- align 3 images to the leftside -->
         
-        <img src="https://t4.ftcdn.net/jpg/01/37/39/61/240_F_137396146_YdMApcVRhlbLZXvzzxRnlGImQbJ6zQuO.jpg" style="height:300px;width: 250px;">
-        <img src="https://t4.ftcdn.net/jpg/01/37/39/61/240_F_137396133_S49HfXiYBw32t0pgTG3tbP11H6Qq172J.jpg" style="height:300px;width: 250px;">
-        <img src="https://t4.ftcdn.net/jpg/01/37/39/61/240_F_137396161_FFg2Zew8qbtvfqY9oXidLi1US231xhU2.jpg" style="height:300px;width: 250px;">
+        <img style="width: 120px;" src="https://t3.ftcdn.net/jpg/00/60/63/86/240_F_60638664_Fv7a3fZFPiV2UzGzHJ5m4Fh2Hr4Auxf0.jpg">
+        <img style="width: 120px;" src="https://t3.ftcdn.net/jpg/00/60/63/36/240_F_60633690_3o9vxNFlhh9tCJK30Rzq1AErRHbfJ5jC.jpg">
+        <img style="width: 120px;" src="https://t3.ftcdn.net/jpg/00/60/69/84/240_F_60698479_hBqzKxYyI5XC2f0E8WkcFUFAUNiTnM2K.jpg">
 
         <br>     
         <select name="max" id="numberOfPlayers" style="width: 70px; height: 48px; font-size: 25px;">
@@ -58,6 +72,8 @@
         
     </form>
     <h3 id="warning"><%= message %> </h3>
+    </div>
+    
 
 
 </body>
