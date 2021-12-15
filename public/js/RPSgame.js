@@ -133,6 +133,7 @@ socket.on('message', (msg) => { // System message from server
 socket.on('emitChat', (msg, username) => { // Chat message from server
     let chatarea = document.getElementById('chatarea');
     chatarea.append("\n" + username + " : " + msg);
+    document.getElementById("chatarea").scrollTop = document.getElementById("chatarea").scrollHeight;
 });
 
 socket.on('resRoomData', (data) => { // Room data from server 

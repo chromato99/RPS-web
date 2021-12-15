@@ -56,6 +56,7 @@ function closeModal() {
 socket.on('lobby:emitChat', (msg, username) => {
     var chatArea = document.getElementById('chatArea');
     chatArea.append("\n" + username + " : " + msg);
+    document.getElementById("chatArea").scrollTop = document.getElementById("chatArea").scrollHeight;
 });
 
 // Room list data from server
