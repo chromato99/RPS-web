@@ -1,0 +1,177 @@
+/* style for headline */
+h1 {
+    text-align: center;
+}
+body {
+    text-align: center;
+    background-color: #DFEBF1;
+}
+
+/* style for modal */
+.modal {
+    display: none;
+    /* Hidden by default */
+    position: fixed;
+    /* Stay in place */
+    z-index: 1;
+    /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%;
+    /* Full width */
+    height: 100%;
+    /* Full height */
+    overflow: auto;
+    /* Enable scroll if needed */
+    background-color: rgb(0, 0, 0);
+    /* Fallback color */
+    background-color: rgba(0, 0, 0, 0.4);
+    /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto;
+    text-align: left;
+    /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 70%;
+    /* Could be more or less, depending on screen size */
+}
+
+/* The Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+
+
+
+/* action for hover, or focus */
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+/* style for table containing the room list */
+table.roomlist {
+    border: 1px solid black;
+    text-align: center;
+}
+
+/* dedault style of td */
+td {
+    border: 1px solid black;
+}
+
+/* default style of th */
+th {
+    border: 1px solid black;
+}
+
+/* style for containing selection of user chosen activities */
+td.n {
+    border: none;
+    color: rgb(61, 25, 223);
+}
+
+/* style for containing selection of user chosen activities */
+th.n {
+    border: none;
+    color: rgb(61, 25, 223);
+}
+
+/* style for link to the main lobby */
+a.t {
+    text-decoration-line: none;
+    color: rgb(3, 3, 3);
+}
+
+/* style for top part of the document */
+div.top {
+    width: 100%;
+    /* style for text */
+    border-bottom-style: solid;
+    border-bottom-width: 4px;
+    border-bottom-color: rgb(210, 156, 226);
+    text-shadow: 2px 2px 2px rgb(71, 109, 214);
+
+}
+
+/* Division containing the whole document */
+div.default {
+    margin: auto;
+    display: inline-block;
+    text-align: left;
+}
+
+/* style for the bottom left part of the document */
+div.left {
+    float: left;
+    width: 360px;
+    min-height: 500px;
+}
+
+/* style for the center bottom part of the document */
+div.center {
+    float: left;
+    width: 300px;
+    min-height: 300px;
+}
+
+/* style for the right bottom part of the document */
+div.right {
+    float: left;
+    width: 360px;
+}
+
+/* style for dividing divided part again */
+div.inner {
+    width: 100%;
+    float: left;
+}
+
+/* style for dividing divided part again */
+div.lgout {
+    width: 100%;
+    float: right;
+    text-align: center;
+}
+
+/* style for the buttons */
+button {
+    border-radius: 5px;
+    margin-right: -4px;
+    border: 1px solid rgb(235, 135, 230);
+    background-color: rgba(212, 209, 211, 0);
+    color: rgb(58, 61, 219);
+    box-shadow: 1px 1px 1px black; 
+    padding: 5px;
+}
+/* style of button when mouse is over it */
+button:hover {
+    border-radius: 5px;
+    margin-right: -4px;
+    border: 1px solid rgb(235, 135, 230);
+    background-color: rgba(106, 190, 223, 0.479);
+    color: rgb(58, 61, 219);
+    padding: 5px;
+}
+/* style of button when it is clicked */
+button:active {
+    margin-left: 0.5%;
+    margin-bottom: 0.5%;
+    box-shadow: none;
+}
+
+/* style for default link */
+a {
+    text-decoration-line: none;
+    color: rgb(0, 22, 223);
+}

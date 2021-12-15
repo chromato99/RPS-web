@@ -1,100 +1,54 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8">
     <title>RPS-web</title>
-    <style>
-        body {
-            background-color: #DFEBF1;
-        }
-        h1 {
-            border-bottom-style: solid;
-            border-bottom-width: 4px;
-            border-bottom-color: rgb(210, 156, 226);
-        }
-        .modal {
-            display: none; /* Hidden by default */
-            position: fixed; /* Stay in place */
-            z-index: 1; /* Sit on top */
-            left: 0;
-            top: 0;
-            width: 100%; /* Full width */
-            height: 100%; /* Full height */
-            overflow: auto; /* Enable scroll if needed */
-            background-color: rgb(0,0,0); /* Fallback color */
-            background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-        }
-
-        /* Modal Content/Box */
-        .modal-content {
-            background-color: #fefefe;
-            margin: 15% auto; /* 15% from the top and centered */
-            padding: 20px;
-            border: 1px solid #888;
-            width: 50%; /* Could be more or less, depending on screen size */                          
-        }
-        /* The Close Button */
-        .close {
-            color: #aaa;
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-        }
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-        
-        td.status{
-            border: 1px solid black;
-            text-align: center;
-            height: 100px;
-            width: 100px;
-        }
-        
-    </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/css/RPSgame.css">
 </head>
 <body>
-    <h1>RPS-web Game Room</h1>
-    <div style="float: left; width: 360px; margin-bottom: 20px;">
-        <div>
-            <table id="usertable" style="float: left; width: 100%;">
-                <tr>
-                <% for(let i = 0; i < room.max_player_count; i++) { %>
-                    <% if(i == 4) { %> 
-                    </tr><tr>
+    <div class="top">
+        <h1>RPS-web Lobby</h1>
+    </div>
+    <div class="outer">
+        <div class="inner" style="margin-bottom: 20px;">
+            <div style="width: 100%;">
+                <table id="usertable">
+                    <tr>
+                    <% for(let i = 0; i < room.max_player_count; i++) { %>
+                        <% if(i == 4) { %> 
+                        </tr><tr>
+                        <% } %> 
+                        <td id="<%= i %>">
+                            <table>
+                                <tr>
+                                    <td class="status">Empty</td>
+                                </tr>
+                                <tr>
+                                    <td class="status"></td>
+                                </tr>
+                            </table>
+                        </td>
                     <% } %> 
-                    <td id="<%= i %>">
-                        <table>
-                            <tr>
-                                <td class="status">Empty</td>
-                            </tr>
-                            <tr>
-                                <td class="status"></td>
-                            </tr>
-                        </table>
-                    </td>
-                <% } %> 
-                </tr>
-            </table>
-        </div><br>
-        <button id="readybtn" onclick="setReady()" style="float: none; height: 100px; width: 49%;">Ready Game</button>
-        <button id="backbtn" onclick="closeGame()" style="float: none; height: 100px; width: 49%;">Back to Lobby</button>
-    </div>
-    <div style="float: left;">
-        <textarea id="chatarea" onfocus="javascript:blur();" style="width: 360px; height: 500px;"></textarea>
-        <form id="chatform">
-            <input id="chatinput" autocomplete="off" type="text" required>
-            <button type="submit">Send</button>
-        </form>
-    </div>
-    <div style="float: left; margin-left: 20px; margin-top: 20px;">
-        <button id="showbtn" onclick="showLobbyUserList()">Show User List</button>
-        <ul id="userlist" style="display: none;">
-            
-        </ul>
+                    </tr>
+                </table>
+            </div><br>
+            <button id="readybtn" onclick="setReady()" style="height: 100px; width: 49%;">Ready Game</button>
+            <button id="backbtn" onclick="closeGame()" style="height: 100px; width: 49%;">Back to Lobby</button>
+        </div>
+        <div class="inner">
+            <textarea id="chatarea" onfocus="javascript:blur();" style="width: 360px; height: 500px;"></textarea>
+            <form id="chatform">
+                <input id="chatinput" autocomplete="off" type="text" required>
+                <button type="submit">Send</button>
+            </form>
+        </div>
+        <div class="inner" style="margin-left: 20px; margin-top: 20px;">
+            <button id="showbtn" onclick="showLobbyUserList()">Show User List</button>
+            <ul id="userlist" style="display: none;">
+                
+            </ul>
+        </div>
     </div>
 
     <!-- The Modal -->
@@ -110,165 +64,8 @@
     <script>
         let username = "<%= username %>"; // 유저 이름 입력 받기
         let roomname = "<%= roomname %>";
-        let socket = io('/game');
-        socket.emit('newPlayer', roomname);
-        socket.emit('reqRoomData');
-
-        let chatform = document.getElementById('chatform');
-        let modal = document.getElementById('myModal');
-
-        function showLobbyUserList() {
-            let userlist = document.getElementById('userlist');
-            if(document.getElementById('userlist').style.display == 'none') {
-                document.getElementById('userlist').style.display = "block";
-                socket.emit('reqLobbyUserList');
-            } else {
-                document.getElementById('userlist').style.display = "none";
-            }
-        }
-
-        function closeModal() {
-            modal.style.display = 'none';
-        }
-
-        function closeGame() {
-            modal.style.display = 'none';
-            socket.disconnect();
-            window.location.href = '/lobby';
-        }
-
-        function invite(id) {
-            let button = document.getElementById(id);
-            button.innerHTML = 'Invited';
-            button.disabled = true;
-            socket.emit('reqInviteUser', id);
-        }
-
-        function setReady() {
-            let readybtn = document.getElementById('readybtn');
-            readybtn.disabled = true;
-            socket.emit('ready');
-        }
-
-        function setRock() {
-            modal.style.display = 'none';
-            socket.emit('setSelection', 'rock', 1);
-        }
-
-        function setPaper() {
-            modal.style.display = 'none';
-            socket.emit('setSelection', 'paper', 2);
-        }
-
-        function setScissor() {
-            modal.style.display = 'none';
-            socket.emit('setSelection', 'scissor', 3);
-        }
-
-        socket.on('gameStarted', (data) => { // 게임 시작됩을 알려주는 응답
-            let showbtn = document.getElementById('showbtn');
-            showbtn.style.display = 'none';
-            let insideModal = document.getElementById('insideModal');
-            modal.style.display = 'block';
-            insideModal.innerHTML = `
-                <h2>Game Started!!</h2>
-                <h3>Select your choice</h3>
-                <button onclick="setRock()">Rock</button>
-                <button onclick="setScissor()">Scissor</button>
-                <button onclick="setPaper()">Paper</button>
-            `;
-        });
-
-        socket.on('draw', () => {
-            let insideModal = document.getElementById('insideModal');
-            let chatarea = document.getElementById('chatarea');
-            chatarea.append("\n" + 'Game Ended');
-
-            modal.style.display = 'block';
-            insideModal.innerHTML = `
-                <h2>You Draw</h2>
-                <button onclick="closeModal()">Show Results</button>
-                <button onclick="closeGame()">Back To Lobby</button>
-            `;
-        });
-
-        socket.on('winloss', (players, winSelection) => {
-            let insideModal = document.getElementById('insideModal');
-            let chatarea = document.getElementById('chatarea');
-            chatarea.append("\n" + 'Game Ended');
-
-            let player;
-            players.forEach((elem) => {
-                if(elem.name == username) {
-                    player = elem;
-                }
-            });
-
-            if(player.selection == winSelection) {
-                insideModal.innerHTML = `
-                    <h2>You Win!!</h2>
-                    <button onclick="closeModal()">Show Results</button>
-                    <button onclick="closeGame()">Back To Lobby</button>
-                `;
-            } else {
-                insideModal.innerHTML = `
-                    <h2>You Lose T.T</h2>
-                    <button onclick="closeModal()">Show Results</button>
-                    <button onclick="closeGame()">Back To Lobby</button>
-                `;
-            }
-            modal.style.display = 'block';
-        });
-
-        // 메시지 수신시 HTML에 메시지 내용 작성
-        socket.on('message', (msg) => {
-            let chatarea = document.getElementById('chatarea');
-            chatarea.append("\n" + msg);
-        });
-
-        socket.on('emitChat', (msg, username) => {
-            let chatarea = document.getElementById('chatarea');
-            chatarea.append("\n" + username + " : " + msg);
-        });
-
-        socket.on('resRoomData', (data) => {
-            for(let i = 0; i < data.players.length; i++) {
-                let td = document.getElementById(i.toString());
-                td.innerHTML = `
-                    <table>
-                        <tr>
-                            <td class="status">${data.players[i].name}</td>
-                        </tr>
-                        <tr>
-                            <td class="status">${data.players[i].status}</td>
-                        </tr>
-                    </table>
-                `;
-            }
-        });
         
-        socket.on('resLobbyUserList', (data) => {
-            let userList = document.getElementById('userlist');
-            userList.innerHTML = '';
-            data.forEach((elem) => {
-                userList.innerHTML += `
-                <li >${elem.username}<button id="${elem.id}" onclick="invite('${elem.id}')" >Invite</button></li>
-                `;
-            });
-        });
-
-        socket.on('userDisconnected', (username) => {
-
-        });
-        chatform.onsubmit = (e) => {
-            e.preventDefault();
-            let chatinput = document.getElementById('chatinput');
-
-            // socket.emit으로 서버에 채팅 전달
-            socket.emit('sendChat', chatinput.value, username);
-
-            chatinput.value = "";
-        };
     </script>
+    <script type="text/javascript" src="/js/RPSgame.js"></script>
 </body>
 </html>

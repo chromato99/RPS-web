@@ -2,26 +2,31 @@
 
 <head>
     <title>RPS-web</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style type="text/css">
-    h1 {
-        text-align: center;
-        /* align the New Room to the center of the page */
-    }
-    body {
-        background-color: #DFEBF1;
-    }
-    a {
-        color: black;
-        font-size: 36px;
-    }
+        h1 {
+            text-align: center;
+            /* align the New Room to the center of the page */
+        }
+        body {
+            background-color: #DFEBF1;
+        }
+        a {
+            color: black;
+            font-size: 36px;
+        }
+
+        #warning {
+            color: red;
+        }
     </style>
 </head>
   
 <body>
     <h1>RPS-web Making New Room</h1>
 
-    <img src="https://t4.ftcdn.net/jpg/00/86/16/21/240_F_86162112_uOlc958HLu91DMpNj7YxNgHdIhD5NQ78.jpg"
-    style="width: 35px;">
+    <img src="https://t4.ftcdn.net/jpg/00/86/16/21/240_F_86162112_uOlc958HLu91DMpNj7YxNgHdIhD5NQ78.jpg" style="width: 35px;">
     <a href="/lobby">Back</a>
     <!--when you press back button, you go back to the lobby page -->
     <br>
@@ -49,10 +54,10 @@
         <!-- <input type='password' name='password' placeholder='password'> -->
      
         <!-- press 'submit' button -->
-        <input type='submit' value="Submit" style="height: 50px; width: 90px; font-size: 20px;"> &emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;&emsp;
-
+        <input type='submit' value="Submit" style="height: 50px; width: 90px; font-size: 20px;"> 
         
     </form>
+    <h3 id="warning"><%= message %> </h3>
 
 
 </body>

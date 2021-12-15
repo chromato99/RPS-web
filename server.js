@@ -14,11 +14,13 @@ let LocalStrategy = require('passport-local').Strategy;
 let ejs = require('ejs');
 let mysql = require('mysql');
 let io = require('socket.io')(server);
-const db_config = require('./src/db-config');
 const bodyParser = require('body-parser');
 const { SocketAddress } = require('net');
 const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
 
+const db_config = require('./src/db-config');
+const gameHandler = require('./src/gameHandler');
+const lobbyHandler = require('./src/lobbyHandler');
 let roomList = new Array();
 
 
@@ -28,8 +30,7 @@ app.set('views',  __dirname + '/views'); // ejs이 있는 폴더를 지정
 app.use(compression());
 app.use(express.static('public'));
 
-let db = mysql.createConnection(db_config);
-db.connect();
+
 
 app.use(express.urlencoded({ extended: false }));
 app.use(session({
@@ -45,6 +46,8 @@ app.use(passport.session());
 // Passport.js setting
 passport.use(new LocalStrategy(
     function(username, password, done) {
+    let db = mysql.createConnection(db_config);
+    db.connect();
     db.query('SELECT * FROM user WHERE username=?', [username], (err, results) => {
         if(err) return done(err);
         if(!results[0]) 
@@ -69,6 +72,8 @@ passport.serializeUser(function(user, done) {
 });
 
 passport.deserializeUser(function(username, done) {
+    let db = mysql.createConnection(db_config);
+    db.connect();
     db.query('SELECT * FROM user WHERE username=?', [username], function(err, results){
     if(err)
         return done(err, false);
@@ -86,13 +91,26 @@ let lobbyIO = io.of('/lobby');
 lobbyIO.use(wrap(session({ secret: "!@#$%^&*", store: new MySQLStore(db_config), resave: false, saveUninitialized: false })));
 lobbyIO.use(wrap(passport.initialize()));
 lobbyIO.use(wrap(passport.session()));
-
+lobbyIO.use((socket, next) => {
+    if (socket.request.user) {
+        next();
+    } else {
+        next(new Error("unauthorized"))
+    }
+});
 
 let gameIO = io.of('/game');
 
 gameIO.use(wrap(session({ secret: "!@#$%^&*", store: new MySQLStore(db_config), resave: false, saveUninitialized: false })));
 gameIO.use(wrap(passport.initialize()));
 gameIO.use(wrap(passport.session()));
+gameIO.use((socket, next) => {
+    if (socket.request.user) {
+        next();
+    } else {
+        next(new Error("unauthorized"))
+    }
+});
 
 // Express.js get,post request code
 
@@ -121,6 +139,8 @@ app.post('/login', // 로그인 요청이 들어왔을때
 );
 
 app.get('/logout', (req, res) => {
+    let db = mysql.createConnection(db_config);
+    db.connect();
     db.query('UPDATE user SET last_connection=NOW() WHERE username=?', [req.user.username]);
     req.logout();
     res.redirect('/login');
@@ -135,6 +155,8 @@ app.get('/signup', (req, res) => {
 });
 
 app.post('/signup', (req, res) => {
+    let db = mysql.createConnection(db_config);
+    db.connect();
     db.query('SELECT * FROM user WHERE username=?', [req.body.username], (err, results) => {
         if(err)
             res.render('signup', {message: 'input sign up data'});
@@ -167,7 +189,7 @@ app.get('/newroom', (req, res) => {
     if(!req.user) {
         res.redirect('/login');
     } else {
-        res.render('newroom');
+        res.render('newroom', {message: ''});
     }
 });
 
@@ -177,7 +199,7 @@ app.post('/newroom', (req, res) => {
     } else {
         roomList.forEach((elem) => {
             if(elem.name == req.body.roomname) {
-                res.redirect('/newroom');
+                res.redirect('/newroom', {message: 'A room with the same name already exists.'});
             }
         });
         let room = {
@@ -207,7 +229,6 @@ app.get('/game/:roomname', (req, res) => {
             }
         });
         if(!room) {
-            console.log("no such room : ", req.params.roomname, "| username : ",req.user.username);
             res.redirect('/lobby');
         } else {
             res.render('RPSgame', {username: req.user.username, roomname: req.params.roomname, room: room});
@@ -218,237 +239,15 @@ app.get('/game/:roomname', (req, res) => {
 
 // Lobby Socket IO Code
 
-
-lobbyIO.use((socket, next) => {
-    if (socket.request.user) {
-        console.log("Authorized", socket.request.user.username);
-        next();
-    } else {
-        next(new Error("unauthorized"))
-    }
-});
-
 lobbyIO.on('connection', (socket) => {
-    socket.on('lobby:newplayer',(msg) => { // 새로운 플레이어 입장
-        console.log('lobbyIO : ', msg);
-        lobbyIO.emit('lobby:chatemit', 'Joined Lobby!!', socket.request.user.username);
-    });
-
-    socket.on('lobby:sendChat', (msg) => {
-        if(msg.includes("$$:")) {
-            const [destUsername, message] = msg.split("$$:");
-            let socketList = lobbyIO.sockets;
-            if(socketList.size > 0) {
-                socketList.forEach((elem) => {
-                    if(elem.request.user.username == destUsername) {
-                        //console.log('lobby:emitChat', `(Whisper) ` + message);
-                        lobbyIO.to(elem.id).emit('lobby:emitChat', `(Whisper) ` + message, socket.request.user.username);
-                        lobbyIO.to(socket.id).emit('lobby:emitChat', `(Whisper) ` + message, socket.request.user.username);
-                    }
-                });
-            }
-        } else {
-            console.log('lobbyIO(' + socket.request.user.username + ') : ' + msg);
-            lobbyIO.emit('lobby:emitChat', msg, socket.request.user.username);
-        }
-    });
-
-
-    socket.on('lobby:reqUserList', () => {
-        let userList = new Array();
-        userList.push({
-            id: socket.id,
-            username: socket.request.user.username
-        });
-        let socketList = lobbyIO.sockets;
-        if(socketList.size > 0) {
-            socketList.forEach((elem) => {
-                if(elem != socket) {
-                    userList.push({
-                        id: elem.id,
-                        username: elem.request.user.username
-                    });
-                }
-            }); 
-        }
-        socket.emit('lobby:resUserList', userList);
-    });
-
-    socket.on('lobby:reqRoomList', () => {
-        socket.emit('lobby:resRoomList', roomList);
-    });
-
-    socket.on('lobby:reqUserData', (username) => {
-        db.query('SELECT * FROM user WHERE username=?', [username], (err, results) => {
-            results[0].password = '';
-            socket.emit('lobby:resUserData', results[0]);
-        });
-    });
-
-    socket.on('disconnect', (reason) => {
-    });
+    lobbyHandler(lobbyIO, socket, roomList);
 });
 
 
 // Game Socket IO Code
 
-function updateDraw(userList) {
-    userList.forEach((elem) => {
-        db.query('UPDATE user SET draw=draw+1 WHERE username=?', [elem.name]);
-    });
-}
-
-function updateWinLoss(userList, winSelection) {
-    userList.forEach((elem) => {
-        if(elem.selection == winSelection) {
-            db.query('UPDATE user SET win=win+1 WHERE username=?', [elem.name]);
-        } else {
-            db.query('UPDATE user SET loss=loss+1 WHERE username=?', [elem.name]);
-        }
-    });
-}
-
-gameIO.on('connection', (socket) => {   //연결이 들어오면 실행되는 이벤트
-    // socket 변수에는 실행 시점에 연결한 상대와 연결된 소켓의 객체가 들어있다.
-    socket.on('newPlayer', (roomname) => {
-        socket.data.roomname = roomname;
-        socket.join(roomname);
-        
-        
-        roomList.forEach((elem) => {
-            if(elem.name == roomname) {
-                elem.players.push({
-                    name: socket.request.user.username,
-                    ready: false,
-                    status: '',
-                    selection: 0,
-                });
-                socket.data.room = elem;
-            }
-        });
-        gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
-        gameIO.to(socket.data.roomname).emit('message', socket.request.user.username + ' joined!!');
-    });
-
-    socket.on('reqRoomData', () => {
-        socket.emit('resRoomData', socket.data.room);
-    });
-
-    socket.on('ready', () => {
-        console.log(socket.request.user.username, " ready");
-        socket.data.room.players.forEach((elem) => {
-            if(elem.name == socket.request.user.username) {
-                elem.ready = true;
-                elem.status = 'ready';
-            }
-        });
-        socket.data.room.ready++;
-        gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
-        gameIO.to(socket.data.roomname).emit('message', socket.request.user.username + ' Ready');
-        if(socket.data.room.players.length == socket.data.room.ready) {
-            socket.data.room.ready = 0;
-            socket.data.room.started = true;
-            gameIO.to(socket.data.roomname).emit('gameStarted');
-        }
-    });
-    
-    socket.on('setSelection', (selectionName, selection) => {
-        console.log(socket.request.user.username, " selected ", selectionName);
-        socket.data.room.players.forEach((elem) => {
-            if(elem.name == socket.request.user.username) {
-                elem.status = selectionName;
-                elem.selection = selection;
-            }
-        });
-        socket.data.room.ready++;
-        gameIO.to(socket.data.roomname).emit('message', socket.request.user.username + ' Selected');
-        if(socket.data.room.players.length == socket.data.room.ready) {
-            socket.data.room.ready = 0;
-
-            // Find winner
-            let rock = 0;
-            let paper = 0;
-            let scissor = 0;
-
-            socket.data.room.players.forEach((elem) => {
-                if(elem.selection == 1) {
-                    rock++;
-                } else if(elem.selection == 2) {
-                    paper++;
-                } else if(elem.selection == 3) {
-                    scissor++;
-                } else {
-                    console.log('Something wrong when collect selection');
-                }
-            });
-
-            if(rock > 0 && paper > 0 && scissor > 0) {
-                updateDraw(socket.data.room.players);
-                gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
-                gameIO.to(socket.data.roomname).emit('draw');
-            } else if((rock == 0 && scissor == 0) || (rock == 0 && paper == 0) || (scissor == 0 && paper == 0)) {
-                updateDraw(socket.data.room.players);
-                gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
-                gameIO.to(socket.data.roomname).emit('draw');
-            } else if(rock == 0) {
-                updateWinLoss(socket.data.room.players, 3);
-                gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
-                gameIO.to(socket.data.roomname).emit('winloss', socket.data.room.players, 3);
-            } else if(paper == 0) {
-                updateWinLoss(socket.data.room.players, 1);
-                gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
-                gameIO.to(socket.data.roomname).emit('winloss', socket.data.room.players, 1);
-            } else if(scissor == 0) {
-                updateWinLoss(socket.data.room.players, 2);
-                gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
-                gameIO.to(socket.data.roomname).emit('winloss', socket.data.room.players, 2);
-            } else {
-                console.log('Something wrong when find winner');
-            }
-        }
-    });
-
-    socket.on('sendChat', (msg, username) => {
-        gameIO.to(socket.data.roomname).emit('emitChat', msg, username);
-    });
-
-    socket.on('reqInviteUser', (id) => {
-        lobbyIO.to(id).emit('lobby:invite', socket.request.user.username, socket.data.roomname);
-    });
-
-    socket.on('reqLobbyUserList', () => {
-        let userList = new Array();
-        let socketList = lobbyIO.sockets;
-        if(socketList.size > 0) {
-            socketList.forEach((elem) => {
-                userList.push({
-                    id: elem.id,
-                    username: elem.request.user.username
-                });
-            });
-        }
-        socket.emit('resLobbyUserList', userList);
-    });
-
-    socket.on('disconnect', (reason) => {
-        console.log(reason, socket.request.user.username);
-        for(let i = 0; i < socket.data.room.players.length; i++) {
-            if(socket.data.room.players[i].name == socket.request.user.username) {
-                socket.data.room.players.splice(i, 1);
-                break;
-            }
-        }
-        if(socket.data.room.players.length == 0) {
-            for(let i = 0; i < roomList.length; i++) {
-                if(roomList[i].name == socket.data.room.name) {
-                    roomList.splice(i, 1);
-                    return;
-                }
-            }
-        }
-        gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
-        gameIO.to(socket.data.roomname).emit('userDisconnected', socket.request.user.username);
-    });
+gameIO.on('connection', (socket) => {
+    gameHandler(gameIO, lobbyIO, socket, roomList)
 });
 
 server.listen(port, function() {

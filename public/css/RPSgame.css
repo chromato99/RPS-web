@@ -1,0 +1,68 @@
+body {
+    background-color: #DFEBF1;
+    text-align: center;
+}
+h1 {
+    color: rgb(3, 3, 3);
+    
+}
+
+div.top {
+    width: 100%;
+    /* style for text */
+    border-bottom-style: solid;
+    border-bottom-width: 4px;
+    border-bottom-color: rgb(210, 156, 226);
+    text-shadow: 2px 2px 2px rgb(71, 109, 214);
+
+}
+
+.modal {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    top: 0;
+    width: 100%; /* Full width */
+    height: 100%; /* Full height */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgb(0,0,0); /* Fallback color */
+    background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.modal-content {
+    background-color: #fefefe;
+    margin: 15% auto; /* 15% from the top and centered */
+    padding: 20px;
+    border: 1px solid #888;
+    width: 50%; /* Could be more or less, depending on screen size */                          
+}
+/* The Close Button */
+.close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+}
+.close:hover,
+.close:focus {
+    color: black;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+td.status{
+    border: 1px solid black;
+    text-align: center;
+    height: 100px;
+    width: 100px;
+}
+
+div.outer {
+    display: inline-block;
+}
+div.inner {
+    display: block;
+    float: left;
+}
