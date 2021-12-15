@@ -152,6 +152,20 @@ socket.on('resRoomData', (data) => { // Room data from server
             </table>
         `;
     }
+
+    for(let i = data.players.length; i < data.room.max_player_count; i++) {
+        let td = document.getElementById(i.toString());
+        td.innerHTML = `
+            <table>
+                <tr>
+                    <td class="status">Empty</td>
+                </tr>
+                <tr>
+                    <td class="status"></td>
+                </tr>
+            </table>
+        `;
+    }
 });
 
 socket.on('resLobbyUserList', (data) => { // Lobby user list from server
