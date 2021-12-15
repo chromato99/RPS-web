@@ -38,19 +38,19 @@
 
             <!-- divide for the left part of the top division, where an icon will be displayed -->
             <div class="left">
-                <img src="https://cdn-icons-png.flaticon.com/512/744/744118.png" style="height: 110px; float: right;">
+                <img src="https://cdn-icons-png.flaticon.com/512/744/744118.png" style="height: 80px; float: right;">
             </div>
 
             <!-- divide for the right part of the top division, where an another icon will be displayed -->
             <div class="right">
-                <img src="https://cdn-icons-png.flaticon.com/512/744/744119.png" style="height: 110px; float: left;">
+                <img src="https://cdn-icons-png.flaticon.com/512/744/744119.png" style="height: 80px; float: left;">
             </div>
             <!--image downloaded from https://www.flaticon.com/search?word=paper+scissors+rock-->
 
             <!-- divide for the centeral part of the top division, where a text will be displayed -->
             <div class="center">
-                <h1 style="font-size: 50px;">
-                    Welcome to the game of RPS!!
+                <h1>
+                    RPS-web Sign Up
                 </h1>
 
             </div>
@@ -58,25 +58,10 @@
 
         <div class="bottom">
 
-            <!-- divide for the left part of the remaining part of the document except for the top part -->
-            <div class="left">
-
-            </div>
-            <!-- divide for the right part of the remaining part of the document except for the top part -->
-            <div class="right">
-
-            </div>
-
             <!-- divide for the centeral part of the remaing part of the document except for the top part, where 
         user will input data for signing up -->
-            <div class="center">
-
-                    <div class="tp">
-
-                    </div>
-                    <!-- divide for the centeral part of the centeral part of the bottom part, where user will input their data -->
-            
-                <!-- divide for the centeral part of the centeral part of the bottom part, where user will input their data -->
+            <form action='/signup' method='post'>
+            <!-- divide for the centeral part of the centeral part of the bottom part, where user will input their data -->
                 <div class="centre">
                     <!-- table for containing data for the newly input user data -->
                     <table style=" margin-left:auto; margin-right:auto;">
@@ -84,32 +69,27 @@
                         <!-- ID input (nickname) -->
                         <tr>
                             <td width="50%"><b style="font-size: 25px;">ID (Nickname) </b></td>
-                            <td><input type='text' name='username' placeholder='example' 
-                                style="float:right; font-size: 15px" required>
+                            <td><input type='text' name='username' placeholder='example' style="float:right; font-size: 15px" required>
                             </td> 
                         </tr> 
 
                         <!-- email input -->
                         <tr>
                             <td width="50%"><b style="font-size: 25px;">Email</b></td>
-                            <td> <input type='email' name='email' id='email' placeholder='example@gachon.ac.kr'
-                                    style="float:right; font-size: 15px;" required></td>
+                            <td> <input type='email' name='email' id='email' placeholder='example@gachon.ac.kr' style="float:right; font-size: 15px;" required></td>
                         </tr>
 
                         <!-- password input -->
                         <tr>
                             <td width="50%"><b style="font-size: 25px;">Password</b></td>
-                            <td><input type='password' name='password' id="password"
-                                    placeholder='enter more than 6 letters' style="float:right; font-size: 15px"
-                                    pattern=".{6,}" required onchange="check_pw()"></td>
+                            <td><input type='password' name='password' id="password" placeholder='enter more than 6 letters' style="float:right; font-size: 15px" pattern=".{6,}" required onchange="check_pw()"></td>
                         </tr>
 
                         <!-- password re input for confirming whether 2 are the same -->
                         <tr>
 
                             <td width="50%"><b style="font-size: 25px;">Confirm Password</b></td>
-                            <td><input type='password' name='re-password' id='re-password' placeholder='re-password'
-                                    style="float: right; font-size: 15px" onchange="check_pw()" required>
+                            <td><input type='password' name='re-password' id='re-password' placeholder='re-password' style="float: right; font-size: 15px" onchange="check_pw()" required>
 
                             </td>
                         </tr>
@@ -117,18 +97,18 @@
 
                         </table>
                         <br>
-                    </div>
+                </div>
                     <!-- divide for the bottom part of the centeral part, where submit button, link back to log in file exists -->
-                    <div class="btm">
-                        <p><span id="check"></span><br><br><br>
-                            <!-- submit input data to the DB -->
-                            <input type='submit' value="Sign Up"
-                                style="border-radius: 5px; margin-right:-4px; border: 1px solid rgb(235, 135, 230); background-color: rgba(0,0,0,0); color: rgb(245, 53, 171); padding: 10px; font-size: 20px;">
-                        <p>
-                            <!-- if user already have ID then, go back to log in page -->
-                        <p><a href="/login" style="font-size: 25px;"><b>Do you already have an account?</b></a>
-                    </div>
-            </div>
+                <div class="btm">
+                    <p><span id="check"></span><br><br><br>
+                        <!-- submit input data to the DB -->
+                        <input type='submit' value="Sign Up"
+                            style="border-radius: 5px; margin-right:-4px; border: 1px solid rgb(235, 135, 230); background-color: rgba(0,0,0,0); color: rgb(245, 53, 171); padding: 10px; font-size: 20px;">
+                    <p>
+                        <!-- if user already have ID then, go back to log in page -->
+                    <p><a href="/login" style="font-size: 25px;"><b>Do you already have an account?</b></a>
+                </div>
+            </form>
         </div>
     </div>
 

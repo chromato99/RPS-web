@@ -56,7 +56,7 @@ module.exports = (gameIO, lobbyIO, socket, roomList) => {
         socket.data.room.ready++;
         gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
         gameIO.to(socket.data.roomname).emit('message', socket.request.user.username + ' Ready');
-        if(socket.data.room.players.length == socket.data.room.ready) {
+        if(socket.data.room.players.length > 1 && socket.data.room.players.length == socket.data.room.ready) {
             socket.data.room.ready = 0;
             socket.data.room.started = true;
             gameIO.to(socket.data.roomname).emit('gameStarted');
@@ -147,9 +147,10 @@ module.exports = (gameIO, lobbyIO, socket, roomList) => {
         for(let i = 0; i < socket.data.room.players.length; i++) {
             if(socket.data.room.players[i].name == socket.request.user.username) {
                 socket.data.room.players.splice(i, 1);
-                if(socket.data.room.players.length < 2) {
+                if(socket.data.room.started) {
                     gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
                     gameIO.to(socket.data.roomname).emit('gameBroked');
+                    gameIO.to(socket.data.roomname).disconnectSockets();
                 }
                 break;
             }

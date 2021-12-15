@@ -61,9 +61,9 @@ socket.on('gameStarted', (data) => { // 게임 시작됩을 알려주는 응답
     insideModal.innerHTML = `
         <h2>Game Started!!</h2>
         <h3>Select your choice</h3>
-        <button onclick="setRock()">Rock</button>
-        <button onclick="setScissor()">Scissor</button>
-        <button onclick="setPaper()">Paper</button>
+        <button onclick="setRock()" style="height: 50px; width: 100px;">Rock</button>
+        <button onclick="setScissor()" style="height: 50px; width: 100px;">Scissor</button>
+        <button onclick="setPaper()" style="height: 50px; width: 100px;">Paper</button>
     `;
 });
 
@@ -75,8 +75,8 @@ socket.on('draw', () => {
     modal.style.display = 'block';
     insideModal.innerHTML = `
         <h2>You Draw</h2>
-        <button onclick="closeModal()">Show Results</button>
-        <button onclick="closeGame()">Back To Lobby</button>
+        <button onclick="closeModal()" style="height: 50px; width: 100px;">Show Results</button>
+        <button onclick="closeGame()" style="height: 50px; width: 100px;">Back To Lobby</button>
     `;
 });
 
@@ -95,14 +95,14 @@ socket.on('winloss', (players, winSelection) => {
     if(player.selection == winSelection) {
         insideModal.innerHTML = `
             <h2>You Win!!</h2>
-            <button onclick="closeModal()">Show Results</button>
-            <button onclick="closeGame()">Back To Lobby</button>
+            <button onclick="closeModal()" style="height: 50px; width: 100px;">Show Results</button>
+            <button onclick="closeGame()" style="height: 50px; width: 100px;">Back To Lobby</button>
         `;
     } else {
         insideModal.innerHTML = `
             <h2>You Lose T.T</h2>
-            <button onclick="closeModal()">Show Results</button>
-            <button onclick="closeGame()">Back To Lobby</button>
+            <button onclick="closeModal()" style="height: 50px; width: 100px;">Show Results</button>
+            <button onclick="closeGame()" style="height: 50px; width: 100px;">Back To Lobby</button>
         `;
     }
     modal.style.display = 'block';
@@ -145,8 +145,22 @@ socket.on('resLobbyUserList', (data) => {
     });
 });
 
-socket.on('userDisconnected', (username) => {
+socket.on('gameBroked', () => {
+    let chatarea = document.getElementById('chatarea');
+    chatarea.append("\n" +"Game Broked!!! Please back to lobby.");
+    let insideModal = document.getElementById('insideModal');
 
+    modal.style.display = 'block';
+    insideModal.innerHTML = `
+        <h2>Game Broked!!!</h2>
+        <p>The game broked because the player was disconnected. Records will not be saved, so please return to the lobby.</p>
+        <button onclick="closeGame()" style="height: 50px; width: 100px;">Back To Lobby</button>
+    `;
+});
+
+socket.on('userDisconnected', (username) => {
+    let chatarea = document.getElementById('chatarea');
+    chatarea.append("\n" + username +" Disconnected.");
 });
 chatform.onsubmit = (e) => {
     e.preventDefault();
