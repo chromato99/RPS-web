@@ -5,7 +5,9 @@ module.exports = (gameIO, lobbyIO, socket, roomList) => {
     let db = mysql.createConnection(db_config);
     db.connect();
 
-    function updateDraw(userList) {
+
+    // Functions for updating user record
+    function updateDraw(userList) { 
         userList.forEach((elem) => {
             db.query('UPDATE user SET draw=draw+1 WHERE username=?', [elem.name]);
         });
@@ -21,12 +23,14 @@ module.exports = (gameIO, lobbyIO, socket, roomList) => {
         });
     }
 
+
+    // Entering new player request
     socket.on('newPlayer', (roomname) => {
         socket.data.roomname = roomname;
         socket.join(roomname);
         
         
-        roomList.forEach((elem) => {
+        roomList.forEach((elem) => {  // Find room
             if(elem.name == roomname) {
                 elem.players.push({
                     name: socket.request.user.username,
@@ -37,14 +41,19 @@ module.exports = (gameIO, lobbyIO, socket, roomList) => {
                 socket.data.room = elem;
             }
         });
+
+        // Protocol call to update information when a new user arrives
         gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
         gameIO.to(socket.data.roomname).emit('message', socket.request.user.username + ' joined!!');
     });
 
+
+    // Protocol request to update room data
     socket.on('reqRoomData', () => {
         socket.emit('resRoomData', socket.data.room);
     });
 
+    // Protocol request that the user is ready
     socket.on('ready', () => {
         console.log(socket.request.user.username, " ready");
         socket.data.room.players.forEach((elem) => {
@@ -56,6 +65,8 @@ module.exports = (gameIO, lobbyIO, socket, roomList) => {
         socket.data.room.ready++;
         gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
         gameIO.to(socket.data.roomname).emit('message', socket.request.user.username + ' Ready');
+
+        // If every user ready, Start game
         if(socket.data.room.players.length > 1 && socket.data.room.players.length == socket.data.room.ready) {
             socket.data.room.ready = 0;
             socket.data.room.started = true;
@@ -63,6 +74,7 @@ module.exports = (gameIO, lobbyIO, socket, roomList) => {
         }
     });
     
+    // Protocol for selecting RPS after game started
     socket.on('setSelection', (selectionName, selection) => {
         console.log(socket.request.user.username, " selected ", selectionName);
         socket.data.room.players.forEach((elem) => {
@@ -73,6 +85,8 @@ module.exports = (gameIO, lobbyIO, socket, roomList) => {
         });
         socket.data.room.ready++;
         gameIO.to(socket.data.roomname).emit('message', socket.request.user.username + ' Selected');
+
+        // If every user selected RPS, Set game ended and compute to find winner
         if(socket.data.room.players.length == socket.data.room.ready) {
             socket.data.room.ready = 0;
             socket.data.room.started = false;
@@ -94,13 +108,13 @@ module.exports = (gameIO, lobbyIO, socket, roomList) => {
                     console.log('Something wrong when collect selection');
                 }
             });
-
-            if(rock > 0 && paper > 0 && scissor > 0) {
+            
+            if(rock > 0 && paper > 0 && scissor > 0) { // If every selection is appear
                 updateDraw(socket.data.room.players);
                 gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
                 gameIO.to(socket.data.roomname).emit('draw');
             } else if((rock == 0 && scissor == 0) || (rock == 0 && paper == 0) || (scissor == 0 && paper == 0)) {
-                updateDraw(socket.data.room.players);
+                updateDraw(socket.data.room.players); // If ever selection by user is same
                 gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
                 gameIO.to(socket.data.roomname).emit('draw');
             } else if(rock == 0) {
@@ -121,15 +135,15 @@ module.exports = (gameIO, lobbyIO, socket, roomList) => {
         }
     });
 
-    socket.on('sendChat', (msg, username) => {
+    socket.on('sendChat', (msg, username) => { // Protocol request to send chat
         gameIO.to(socket.data.roomname).emit('emitChat', msg, username);
     });
 
-    socket.on('reqInviteUser', (id) => {
+    socket.on('reqInviteUser', (id) => { // Protocol request to invite user to the room
         lobbyIO.to(id).emit('lobby:invite', socket.request.user.username, socket.data.roomname);
     });
 
-    socket.on('reqLobbyUserList', () => {
+    socket.on('reqLobbyUserList', () => { // Protocol request to get user list in lobby
         let userList = new Array();
         let socketList = lobbyIO.sockets;
         if(socketList.size > 0) {
@@ -143,13 +157,14 @@ module.exports = (gameIO, lobbyIO, socket, roomList) => {
         socket.emit('resLobbyUserList', userList);
     });
 
-    socket.on('disconnect', (reason) => {
+    socket.on('disconnect', (reason) => { // Protocol request when connection is lost
         db.query('UPDATE user SET last_connection=NOW() WHERE username=?', [socket.request.user.username]);
 
+        // Delete user data from room
         for(let i = 0; i < socket.data.room.players.length; i++) {
             if(socket.data.room.players[i].name == socket.request.user.username) {
                 socket.data.room.players.splice(i, 1);
-                if(socket.data.room.started) {
+                if(socket.data.room.started) { // If game is started and some player is disconnected, Stop game and send alert
                     gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
                     gameIO.to(socket.data.roomname).emit('gameBroked');
                     gameIO.to(socket.data.roomname).disconnectSockets();
@@ -157,7 +172,7 @@ module.exports = (gameIO, lobbyIO, socket, roomList) => {
                 break;
             }
         }
-        if(socket.data.room.players.length == 0) {
+        if(socket.data.room.players.length == 0) { // If no one in room, remove room data from roomList
             for(let i = 0; i < roomList.length; i++) {
                 if(roomList[i].name == socket.data.room.name) {
                     roomList.splice(i, 1);
@@ -165,6 +180,8 @@ module.exports = (gameIO, lobbyIO, socket, roomList) => {
                 }
             }
         }
+
+        // Update room data
         gameIO.to(socket.data.roomname).emit('resRoomData', socket.data.room);
         gameIO.to(socket.data.roomname).emit('userDisconnected', socket.request.user.username);
     });

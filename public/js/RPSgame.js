@@ -5,7 +5,7 @@ socket.emit('reqRoomData');
 let chatform = document.getElementById('chatform');
 let modal = document.getElementById('myModal');
 
-function showLobbyUserList() {
+function showLobbyUserList() { // Show lobby user list button onclicked
     let userlist = document.getElementById('userlist');
     if(document.getElementById('userlist').style.display == 'none') {
         document.getElementById('userlist').style.display = "block";
@@ -15,50 +15,52 @@ function showLobbyUserList() {
     }
 }
 
-function closeModal() {
+function closeModal() { // Close modal window button onclicked
     modal.style.display = 'none';
 }
 
-function closeGame() {
+function closeGame() { // Close game button onclicked
     modal.style.display = 'none';
     socket.disconnect();
     window.location.href = '/lobby';
 }
 
-function invite(id) {
+function invite(id) { // Invite button onclicked
     let button = document.getElementById(id);
     button.innerHTML = 'Invited';
     button.disabled = true;
     socket.emit('reqInviteUser', id);
 }
 
-function setReady() {
+function setReady() { // Ready button onclicked
     let readybtn = document.getElementById('readybtn');
     readybtn.disabled = true;
     socket.emit('ready');
 }
 
-function setRock() {
+function setRock() { // Rock selection onlicked
     modal.style.display = 'none';
     socket.emit('setSelection', 'rock', 1);
 }
 
-function setPaper() {
+function setPaper() { // Paper selection onlicked
     modal.style.display = 'none';
     socket.emit('setSelection', 'paper', 2);
 }
 
-function setScissor() {
+function setScissor() { // Scissor selection onclicked
     modal.style.display = 'none';
     socket.emit('setSelection', 'scissor', 3);
 }
 
-socket.on('gameStarted', (data) => { // 게임 시작됩을 알려주는 응답
+socket.on('gameStarted', (data) => { // A response indicating that the game is about to start
     let showbtn = document.getElementById('showbtn');
     showbtn.style.display = 'none';
     let insideModal = document.getElementById('insideModal');
     modal.style.display = 'block';
-    insideModal.innerHTML = `
+
+    // Popup modal window to indicate game started and to choose selection
+    insideModal.innerHTML = ` 
         <h2>Game Started!!</h2>
         <h3>Select your choice</h3>
         <button onclick="setRock()" style="height: 100px; width: 100px;"><img style="width: 100%;" src="https://t3.ftcdn.net/jpg/00/60/63/86/240_F_60638664_Fv7a3fZFPiV2UzGzHJ5m4Fh2Hr4Auxf0.jpg"></button>
@@ -67,7 +69,7 @@ socket.on('gameStarted', (data) => { // 게임 시작됩을 알려주는 응답
     `;
 });
 
-socket.on('draw', () => {
+socket.on('draw', () => { // When game is draw
     let insideModal = document.getElementById('insideModal');
     let chatarea = document.getElementById('chatarea');
     chatarea.append("\n" + 'Game Ended');
@@ -85,7 +87,7 @@ socket.on('draw', () => {
     `;
 });
 
-socket.on('winloss', (players, winSelection) => {
+socket.on('winloss', (players, winSelection) => { // When game has winner and loser
     let insideModal = document.getElementById('insideModal');
     let chatarea = document.getElementById('chatarea');
     chatarea.append("\n" + 'Game Ended');
@@ -97,7 +99,7 @@ socket.on('winloss', (players, winSelection) => {
         }
     });
 
-    if(player.selection == winSelection) {
+    if(player.selection == winSelection) { // Check win or loss
         insideModal.innerHTML = `
             <h2>You Win!!</h2>
             <h3>Game records are stored in your account information.</h3><br>
@@ -123,18 +125,17 @@ socket.on('winloss', (players, winSelection) => {
     modal.style.display = 'block';
 });
 
-// 메시지 수신시 HTML에 메시지 내용 작성
-socket.on('message', (msg) => {
+socket.on('message', (msg) => { // System message from server
     let chatarea = document.getElementById('chatarea');
     chatarea.append("\n" + msg);
 });
 
-socket.on('emitChat', (msg, username) => {
+socket.on('emitChat', (msg, username) => { // Chat message from server
     let chatarea = document.getElementById('chatarea');
     chatarea.append("\n" + username + " : " + msg);
 });
 
-socket.on('resRoomData', (data) => {
+socket.on('resRoomData', (data) => { // Room data from server 
     for(let i = 0; i < data.players.length; i++) {
         let td = document.getElementById(i.toString());
         td.innerHTML = `
@@ -150,7 +151,7 @@ socket.on('resRoomData', (data) => {
     }
 });
 
-socket.on('resLobbyUserList', (data) => {
+socket.on('resLobbyUserList', (data) => { // Lobby user list from server
     let userList = document.getElementById('userlist');
     userList.innerHTML = '';
     data.forEach((elem) => {
@@ -160,12 +161,14 @@ socket.on('resLobbyUserList', (data) => {
     });
 });
 
-socket.on('gameBroked', () => {
+socket.on('gameBroked', () => { // When game is broked
     let chatarea = document.getElementById('chatarea');
     chatarea.append("\n" +"Game Broked!!! Please back to lobby.");
     let insideModal = document.getElementById('insideModal');
 
     modal.style.display = 'block';
+
+    // Player must close game and back to lobby
     insideModal.innerHTML = `
         <h2>Game Broked!!!</h2>
         <p>The game broked because the player was disconnected. Records will not be saved, so please return to the lobby.</p>
@@ -173,11 +176,12 @@ socket.on('gameBroked', () => {
     `;
 });
 
-socket.on('userDisconnected', (username) => {
+socket.on('userDisconnected', (username) => { // When some user in room disconnected
     let chatarea = document.getElementById('chatarea');
     chatarea.append("\n" + username +" Disconnected.");
 });
-chatform.onsubmit = (e) => {
+
+chatform.onsubmit = (e) => { // When chat send button onlicked
     e.preventDefault();
     let chatinput = document.getElementById('chatinput');
 

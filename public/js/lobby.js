@@ -1,4 +1,6 @@
 var socket = io('/lobby');
+
+// Request general information for the lobby
 socket.emit('lobby:newplayer');
 socket.emit('lobby:reqRoomList');
 socket.emit('lobby:reqUserList');
@@ -27,32 +29,36 @@ window.onclick = function (event) {
     }
 }
 
+// When show user data onclicked
 function getUserData(username) {
     modal.style.display = "block";
     console.log(username);
     socket.emit('lobby:reqUserData', username);
 }
 
+// When whisper button onclicked
 function whisper(username) {
     modal.style.display = "none";
     var userData = document.getElementById('userdata');
     userData.innerHTML = '';
-    var chatInput = document.getElementById('chatInput');
+    var chatInput = document.getElementById('chatInput'); // Set the whisper form to the chat input box
     chatInput.value = username + '$$:';
 }
 
+// Close modal window button onclicked
 function closeModal() {
     modal.style.display = "none";
     var userData = document.getElementById('userdata');
     userData.innerHTML = '';
 }
 
-
+// Chat message from server
 socket.on('lobby:emitChat', (msg, username) => {
     var chatArea = document.getElementById('chatArea');
     chatArea.append("\n" + username + " : " + msg);
 });
 
+// Room list data from server
 socket.on('lobby:resRoomList', (data) => {
     var roomList = document.getElementById('roomlist');
     roomList.innerHTML = `
@@ -75,6 +81,8 @@ socket.on('lobby:resRoomList', (data) => {
     })
 });
 
+
+// User list data from server
 socket.on('lobby:resUserList', (data) => {
     var userList = document.getElementById('userlist');
     userList.innerHTML = '';
@@ -89,6 +97,7 @@ socket.on('lobby:resUserList', (data) => {
     });
 });
 
+// Specific user data from server
 socket.on('lobby:resUserData', (data) => {
     var userData = document.getElementById('userdata');
     userData.innerHTML = `
@@ -104,6 +113,8 @@ socket.on('lobby:resUserData', (data) => {
     }
 });
 
+
+// Inviting request from server
 socket.on('lobby:invite', (username, roomname) => {
     modal.style.display = "block";
     var userData = document.getElementById('userdata');
@@ -115,12 +126,12 @@ socket.on('lobby:invite', (username, roomname) => {
     `;
 });
 
-
+// Chat send button onclicked
 chatForm.onsubmit = (e) => {
     e.preventDefault();
     var chatInput = document.getElementById('chatInput');
 
-    // socket.emit으로 서버에 신호를 전달
+    // Send message to server with socket.emit
     socket.emit('lobby:sendChat', chatInput.value);
 
     chatInput.value = "";

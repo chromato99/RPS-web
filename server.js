@@ -24,22 +24,22 @@ const lobbyHandler = require('./src/lobbyHandler');
 let roomList = new Array();
 
 
-app.set('view engine', 'ejs'); // 렌더링 엔진 모드를 ejs로 설정
-app.set('views',  __dirname + '/views'); // ejs이 있는 폴더를 지정
+app.set('view engine', 'ejs'); // Set render engine mode to ejs
+app.set('views',  __dirname + '/views'); // Specify the folder where ejs is located
 
 app.use(compression());
-app.use(express.static('public'));
+app.use(express.static('public')); // Set static file location
 
 
 
 app.use(express.urlencoded({ extended: false }));
-app.use(session({
+app.use(session({ // Session settings
     secret: '!@#$%^&*',
     store: new MySQLStore(db_config),
     resave: false,
     saveUninitialized: false
 }));
-app.use(passport.initialize());
+app.use(passport.initialize()); // passport.js initialization
 app.use(passport.session());
 
 
@@ -48,17 +48,18 @@ passport.use(new LocalStrategy(
     function(username, password, done) {
     let db = mysql.createConnection(db_config);
     db.connect();
+    // Get user data from DB to check password
     db.query('SELECT * FROM user WHERE username=?', [username], (err, results) => {
         if(err) return done(err);
-        if(!results[0]) 
+        if(!results[0]) // Wrong username
             return done('please check your username.');
         else {
-            db.query('UPDATE user SET last_connection=NOW() WHERE username=?', [username]);
+            db.query('UPDATE user SET last_connection=NOW() WHERE username=?', [username]); // Set last connection datetime
             let user = results[0];
-            const [encrypted, salt] = user.password.split("$");
-            crypto.pbkdf2(password, salt, 65536, 64, 'sha512', (err, derivedKey) => {
+            const [encrypted, salt] = user.password.split("$"); // splitting password and salt
+            crypto.pbkdf2(password, salt, 65536, 64, 'sha512', (err, derivedKey) => { // Encrypting input password
                 if(err) return done(err);
-                if(derivedKey.toString("hex") === encrypted)
+                if(derivedKey.toString("hex") === encrypted) // Check its same
                     return done(null, user);
                 else
                     return done('please check your password.');
@@ -67,11 +68,11 @@ passport.use(new LocalStrategy(
     });//query
     }
 ));
-passport.serializeUser(function(user, done) {
+passport.serializeUser(function(user, done) { // passport.js serializing
     done(null, user.username);
 });
 
-passport.deserializeUser(function(username, done) {
+passport.deserializeUser(function(username, done) { // passport.js deserializing with checking Data Existence
     let db = mysql.createConnection(db_config);
     db.connect();
     db.query('SELECT * FROM user WHERE username=?', [username], function(err, results){
@@ -87,7 +88,9 @@ passport.deserializeUser(function(username, done) {
 // Socket IO namespace setting
 
 let lobbyIO = io.of('/lobby');
+let gameIO = io.of('/game');
 
+// Settings for using socket.io with passport.js middleware
 lobbyIO.use(wrap(session({ secret: "!@#$%^&*", store: new MySQLStore(db_config), resave: false, saveUninitialized: false })));
 lobbyIO.use(wrap(passport.initialize()));
 lobbyIO.use(wrap(passport.session()));
@@ -98,8 +101,6 @@ lobbyIO.use((socket, next) => {
         next(new Error("unauthorized"))
     }
 });
-
-let gameIO = io.of('/game');
 
 gameIO.use(wrap(session({ secret: "!@#$%^&*", store: new MySQLStore(db_config), resave: false, saveUninitialized: false })));
 gameIO.use(wrap(passport.initialize()));
@@ -112,9 +113,10 @@ gameIO.use((socket, next) => {
     }
 });
 
+
 // Express.js get,post request code
 
-app.get('/', (req, res) => {
+app.get('/', (req, res) => { // Default entry
     if(!req.user) {
         res.redirect('/login');
     } else {
@@ -122,7 +124,7 @@ app.get('/', (req, res) => {
     }
 });
 
-app.get('/login', (req, res) => {
+app.get('/login', (req, res) => { // Login page
     if(!req.user) {
         res.render('login', {message: 'input your id and password'});        
     } else {
@@ -130,7 +132,7 @@ app.get('/login', (req, res) => {
     }
 });
 
-app.post('/login', // 로그인 요청이 들어왔을때
+app.post('/login', // When a login request is received
     passport.authenticate('local', {
         successRedirect: '/lobby',
         failureRedirect: '/login',
@@ -138,7 +140,7 @@ app.post('/login', // 로그인 요청이 들어왔을때
     })
 );
 
-app.get('/logout', (req, res) => {
+app.get('/logout', (req, res) => { // Logout request
     let db = mysql.createConnection(db_config);
     db.connect();
     db.query('UPDATE user SET last_connection=NOW() WHERE username=?', [req.user.username]);
@@ -146,7 +148,7 @@ app.get('/logout', (req, res) => {
     res.redirect('/login');
 });
 
-app.get('/signup', (req, res) => {
+app.get('/signup', (req, res) => { // signup page
     if(!req.user) {
         res.render('signup', {message: 'input sign up data'});
     } else {
@@ -154,7 +156,7 @@ app.get('/signup', (req, res) => {
     }
 });
 
-app.post('/signup', (req, res) => {
+app.post('/signup', (req, res) => { // Sign Up request
     let db = mysql.createConnection(db_config);
     db.connect();
     db.query('SELECT * FROM user WHERE username=?', [req.body.username], (err, results) => {
@@ -163,12 +165,13 @@ app.post('/signup', (req, res) => {
         if(!!results[0])
             res.render('signup', {message: 'Already existing username'});
         else {
+            // Encrypting password with random salt and inserting new user data in database
             const randomSalt = crypto.randomBytes(32).toString("hex");
-            crypto.pbkdf2(req.body.password, randomSalt, 65536, 64, "sha512", (err, encryptedPassword) => {
+            crypto.pbkdf2(req.body.password, randomSalt, 65536, 64, "sha512", (err, encryptedPassword) => { 
                 const passwordWithSalt = encryptedPassword.toString("hex")+"$"+randomSalt;
                 db.query("insert into user(username, password, email, win, loss, draw,last_connection) values(?,?,?, 0, 0, 0, NOW())",  [req.body.username, passwordWithSalt, req.body.email], (err2)=> {
                     if(err2) 
-                        res.render('signup', {message: 'failed creating new account'});
+                        res.render('signup', {message: 'failed creating new account'}); // if error occurred
                     else
                         res.redirect('/login');
                 });
@@ -177,7 +180,7 @@ app.post('/signup', (req, res) => {
     });
 });
 
-app.get('/lobby', (req, res) => {
+app.get('/lobby', (req, res) => { // Lobby page
     if(!req.user) {
         res.redirect('/login');
     } else {
@@ -185,7 +188,7 @@ app.get('/lobby', (req, res) => {
     }
 });
 
-app.get('/newroom', (req, res) => {
+app.get('/newroom', (req, res) => { // Making new room page
     if(!req.user) {
         res.redirect('/login');
     } else {
@@ -193,16 +196,16 @@ app.get('/newroom', (req, res) => {
     }
 });
 
-app.post('/newroom', (req, res) => {
+app.post('/newroom', (req, res) => { // Making new room request
     if(!req.user) {
         res.redirect('/login');
     } else {
         roomList.forEach((elem) => {
-            if(elem.name == req.body.roomname) {
+            if(elem.name == req.body.roomname) { // If already exist
                 res.redirect('/newroom', {message: 'A room with the same name already exists.'});
             }
         });
-        let room = {
+        let room = { // Create new room data
             name: req.body.roomname,
             players: new Array(),
             max_player_count: req.body.max,
@@ -216,20 +219,20 @@ app.post('/newroom', (req, res) => {
     }
 });
 
-app.get('/game/:roomname', (req, res) => {
+app.get('/game/:roomname', (req, res) => { // Entering game room
     if(!req.user) {
         res.redirect('/login');
     } else {
         let room;
-        roomList.forEach((elem) => {
+        roomList.forEach((elem) => { // Find room data from roomList
             if(req.params.roomname == elem.name) {
                 room = elem;
             }
             if(elem.players.length == elem.max_player_count || elem.started || elem.ended) {
-                res.redirect('/lobby');
+                res.redirect('/lobby'); // If room is full or game already started or game already ended
             }
         });
-        if(!room) {
+        if(!room) { // If room is not exist
             res.redirect('/lobby');
         } else {
             res.render('RPSgame', {username: req.user.username, roomname: req.params.roomname, room: room});
@@ -251,6 +254,6 @@ gameIO.on('connection', (socket) => {
     gameHandler(gameIO, lobbyIO, socket, roomList)
 });
 
-server.listen(port, function() {
+server.listen(port, function() { // Open server
   console.log(`Listening on http://localhost:${port}/`);
 });
