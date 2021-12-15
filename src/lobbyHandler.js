@@ -2,14 +2,14 @@ let mysql = require('mysql');
 const db_config = require('./db-config');
 
 module.exports = (lobbyIO, socket, roomList) => {
-    let db = mysql.createConnection(db_config);
-    db.connect();
-
-
+    
     socket.on('lobby:newplayer',() => { // Protocol request that new player is joined
+        let db = mysql.createConnection(db_config);
+        db.connect();
         db.query('SELECT * FROM user WHERE username=?', [socket.request.user.username], (err, results) => {
             results[0].password = '';
             socket.emit('lobby:resUserData', results[0]);
+            db.end();
         });
         lobbyIO.emit('lobby:emitChat', 'Joined Lobby!!', socket.request.user.username);
     });
@@ -58,14 +58,20 @@ module.exports = (lobbyIO, socket, roomList) => {
     });
 
     socket.on('lobby:reqUserData', (username) => { // Protocol request to get user account data
+        let db = mysql.createConnection(db_config);
+        db.connect();
         db.query('SELECT * FROM user WHERE username=?', [username], (err, results) => {
             results[0].password = '';
             socket.emit('lobby:resUserData', results[0]);
+            db.end();
         });
     });
 
     socket.on('disconnect', (reason) => { // When socket is disconnected
+        let db = mysql.createConnection(db_config);
+        db.connect();
         db.query('UPDATE user SET last_connection=NOW() WHERE username=?', [socket.request.user.username]);
         lobbyIO.emit('lobby:emitChat', ' Disconnected', socket.request.user.username);
+        db.end();
     });
 }

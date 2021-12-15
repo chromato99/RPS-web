@@ -2,24 +2,27 @@ let mysql = require('mysql');
 const db_config = require('./db-config');
 
 module.exports = (gameIO, lobbyIO, socket, roomList) => {
-    let db = mysql.createConnection(db_config);
-    db.connect();
-
 
     // Functions for updating user record
     function updateDraw(userList) { 
         userList.forEach((elem) => {
+            let db = mysql.createConnection(db_config);
+            db.connect();
             db.query('UPDATE user SET draw=draw+1 WHERE username=?', [elem.name]);
+            db.end();
         });
     }
     
     function updateWinLoss(userList, winSelection) {
         userList.forEach((elem) => {
+            let db = mysql.createConnection(db_config);
+            db.connect();
             if(elem.selection == winSelection) {
                 db.query('UPDATE user SET win=win+1 WHERE username=?', [elem.name]);
             } else {
                 db.query('UPDATE user SET loss=loss+1 WHERE username=?', [elem.name]);
             }
+            db.end();
         });
     }
 
@@ -157,8 +160,10 @@ module.exports = (gameIO, lobbyIO, socket, roomList) => {
     });
 
     socket.on('disconnect', (reason) => { // Protocol request when connection is lost
+        let db = mysql.createConnection(db_config);
+        db.connect();
         db.query('UPDATE user SET last_connection=NOW() WHERE username=?', [socket.request.user.username]);
-
+        db.end();
         // Delete user data from room
         for(let i = 0; i < socket.data.room.players.length; i++) {
             if(socket.data.room.players[i].name == socket.request.user.username) {

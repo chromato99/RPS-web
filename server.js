@@ -58,6 +58,7 @@ passport.use(new LocalStrategy(
             return done('please check your username.');
         else {
             db.query('UPDATE user SET last_connection=NOW() WHERE username=?', [username]); // Set last connection datetime
+            db.end();
             let user = results[0];
             const [encrypted, salt] = user.password.split("$"); // splitting password and salt
             crypto.pbkdf2(password, salt, 65536, 64, 'sha512', (err, derivedKey) => { // Encrypting input password
@@ -69,6 +70,7 @@ passport.use(new LocalStrategy(
             });//pbkdf2
         }
     });//query
+
     }
 ));
 passport.serializeUser(function(user, done) { // passport.js serializing
@@ -83,7 +85,7 @@ passport.deserializeUser(function(username, done) { // passport.js deserializing
         return done(err, false);
     if(!results[0])
         return done(err, false);
-
+    db.end();
     return done(null, results[0]);
     });
 });
@@ -147,6 +149,7 @@ app.get('/logout', (req, res) => { // Logout request
     let db = mysql.createConnection(db_config);
     db.connect();
     db.query('UPDATE user SET last_connection=NOW() WHERE username=?', [req.user.username]);
+    db.end();
     req.logout();
     res.redirect('/login');
 });
@@ -176,6 +179,7 @@ app.post('/signup', (req, res) => { // Sign Up request
                 db.query(
                     "insert into user(username, password, email, win, loss, draw,last_connection) values(?,?,?, 0, 0, 0, NOW())",  
                     [req.body.username, passwordWithSalt, req.body.email], (err2)=> {
+                        db.end();
                         if(err2) 
                             res.render('signup', {message: 'failed creating new account'}); // if error occurred
                         else
