@@ -159,6 +159,7 @@ app.get('/signup', (req, res) => { // signup page
 app.post('/signup', (req, res) => { // Sign Up request
     let db = mysql.createConnection(db_config);
     db.connect();
+    console.log(res.body)
     db.query('SELECT * FROM user WHERE username=?', [req.body.username], (err, results) => {
         if(err)
             res.render('signup', {message: 'input sign up data'});
