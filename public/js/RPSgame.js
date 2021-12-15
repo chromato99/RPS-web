@@ -1,4 +1,6 @@
-let socket = io('/game');
+let socket = io('/game', {
+    transports: ["websocket"]
+});
 socket.emit('newPlayer', roomname);
 socket.emit('reqRoomData');
 

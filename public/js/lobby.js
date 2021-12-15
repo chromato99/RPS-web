@@ -1,4 +1,6 @@
-var socket = io('/lobby');
+var socket = io('/lobby', {
+    transports: ["websocket"]
+});
 
 // Request general information for the lobby
 socket.emit('lobby:newplayer');
