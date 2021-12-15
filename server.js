@@ -169,11 +169,13 @@ app.post('/signup', (req, res) => { // Sign Up request
             const randomSalt = crypto.randomBytes(32).toString("hex");
             crypto.pbkdf2(req.body.password, randomSalt, 65536, 64, "sha512", (err, encryptedPassword) => { 
                 const passwordWithSalt = encryptedPassword.toString("hex")+"$"+randomSalt;
-                db.query("insert into user(username, password, email, win, loss, draw,last_connection) values(?,?,?, 0, 0, 0, NOW())",  [req.body.username, passwordWithSalt, req.body.email], (err2)=> {
-                    if(err2) 
-                        res.render('signup', {message: 'failed creating new account'}); // if error occurred
-                    else
-                        res.redirect('/login');
+                db.query(
+                    "insert into user(username, password, email, win, loss, draw,last_connection) values(?,?,?, 0, 0, 0, NOW())",  
+                    [req.body.username, passwordWithSalt, req.body.email], (err2)=> {
+                        if(err2) 
+                            res.render('signup', {message: 'failed creating new account'}); // if error occurred
+                        else
+                            res.redirect('/login');
                 });
             });
         }

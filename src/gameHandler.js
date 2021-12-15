@@ -29,7 +29,6 @@ module.exports = (gameIO, lobbyIO, socket, roomList) => {
         socket.data.roomname = roomname;
         socket.join(roomname);
         
-        
         roomList.forEach((elem) => {  // Find room
             if(elem.name == roomname) {
                 elem.players.push({
