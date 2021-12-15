@@ -24,14 +24,12 @@
                     <tr class="n">
                         <!-- creating new room when user presses button -->
                         <th class="n">Create New Room</th>
-                        <th class="n"><button> <a href="/newroom"><img
-                                        src="https://cdn-icons.flaticon.com/png/512/3329/premium/3329465.png?token=exp=1639497727~hmac=84931e0d5c1001acfea3b7d9115d032d"
-                                        style="height: 30px;"></a><br></button></th>
+                        <th class="n"><button> <a href="/newroom"><img src="/img/new_lobby.png" style="height: 30px;"></a><br></button></th>
                     </tr>
                     <!-- refreshing list of room when user input data -->
                     <tr class="n">
                         <th class="n">Refresh Room List</th>
-                        <th class="n"> <button onclick="socket.emit('lobby:reqRoomList');"><img src="https://cdn-icons-png.flaticon.com/512/740/740819.png" style="height: 30px;"></button></th>
+                        <th class="n"> <button onclick="socket.emit('lobby:reqRoomList');"><img src="/img/refresh_lobby.png" style="height: 30px;"></button></th>
                     </tr>
                 </table>
             </div>
@@ -55,7 +53,7 @@
                 <!-- when button is clicked, user list is updated -->
                 <tr class="n">
                     <th class="n">Refresh User List</th>
-                    <th class="n"> <button onclick="socket.emit('lobby:reqUserList');"><img src="https://cdn-icons-png.flaticon.com/512/740/740819.png" style="height: 30px;"></button></th>
+                    <th class="n"> <button onclick="socket.emit('lobby:reqUserList');"><img src="/img/refresh_lobby.png" style="height: 30px;"></button></th>
                 </tr>
             </table>
 
@@ -78,7 +76,7 @@
             </div>
             <!-- divide for logging out -->
             <div class="lgout">
-                <a href="/logout"><img src="https://icon-library.com/images/free-logout-icon/free-logout-icon-7.jpg" style="height: 50px;"></a>
+                <a href="/logout"><img src="/img/logout_lobby.jpg" style="height: 50px;"></a>
             </div>
 
         </div>

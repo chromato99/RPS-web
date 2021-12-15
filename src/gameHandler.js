@@ -75,6 +75,8 @@ module.exports = (gameIO, lobbyIO, socket, roomList) => {
         gameIO.to(socket.data.roomname).emit('message', socket.request.user.username + ' Selected');
         if(socket.data.room.players.length == socket.data.room.ready) {
             socket.data.room.ready = 0;
+            socket.data.room.started = false;
+            socket.data.room.ended = true;
 
             // Find winner
             let rock = 0;

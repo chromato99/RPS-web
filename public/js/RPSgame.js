@@ -61,9 +61,9 @@ socket.on('gameStarted', (data) => { // 게임 시작됩을 알려주는 응답
     insideModal.innerHTML = `
         <h2>Game Started!!</h2>
         <h3>Select your choice</h3>
-        <button onclick="setRock()" style="height: 50px; width: 100px;">Rock</button>
-        <button onclick="setScissor()" style="height: 50px; width: 100px;">Scissor</button>
-        <button onclick="setPaper()" style="height: 50px; width: 100px;">Paper</button>
+        <button onclick="setRock()" style="height: 100px; width: 100px;"><img style="width: 100%;" src="https://t3.ftcdn.net/jpg/00/60/63/86/240_F_60638664_Fv7a3fZFPiV2UzGzHJ5m4Fh2Hr4Auxf0.jpg"></button>
+        <button onclick="setScissor()" style="height: 100px; width: 100px;"><img style="width: 100%;" src="https://t3.ftcdn.net/jpg/00/60/63/36/240_F_60633690_3o9vxNFlhh9tCJK30Rzq1AErRHbfJ5jC.jpg"></button>
+        <button onclick="setPaper()" style="height: 100px; width: 100px;"><img style="width: 100%;" src="https://t3.ftcdn.net/jpg/00/60/69/84/240_F_60698479_hBqzKxYyI5XC2f0E8WkcFUFAUNiTnM2K.jpg"></button>
     `;
 });
 
@@ -75,8 +75,13 @@ socket.on('draw', () => {
     modal.style.display = 'block';
     insideModal.innerHTML = `
         <h2>You Draw</h2>
-        <button onclick="closeModal()" style="height: 50px; width: 100px;">Show Results</button>
-        <button onclick="closeGame()" style="height: 50px; width: 100px;">Back To Lobby</button>
+        <h3>Game records are stored in your account information.</h3><br>
+        <table style="display: inline-block;">
+        <tr>
+            <td><button onclick="closeModal()" style="height: 50px; width: 100px;">Show Results</button></td>
+            <td><button onclick="closeGame()" style="height: 50px; width: 100px;">Back To Lobby</button></td>
+        </tr>
+        </table>
     `;
 });
 
@@ -95,14 +100,24 @@ socket.on('winloss', (players, winSelection) => {
     if(player.selection == winSelection) {
         insideModal.innerHTML = `
             <h2>You Win!!</h2>
-            <button onclick="closeModal()" style="height: 50px; width: 100px;">Show Results</button>
-            <button onclick="closeGame()" style="height: 50px; width: 100px;">Back To Lobby</button>
+            <h3>Game records are stored in your account information.</h3><br>
+            <table style="display: inline-block;">
+            <tr>
+                <td><button onclick="closeModal()" style="height: 50px; width: 100px;">Show Results</button></td>
+                <td><button onclick="closeGame()" style="height: 50px; width: 100px;">Back To Lobby</button></td>
+            </tr>
+            </table>
         `;
     } else {
         insideModal.innerHTML = `
             <h2>You Lose T.T</h2>
-            <button onclick="closeModal()" style="height: 50px; width: 100px;">Show Results</button>
-            <button onclick="closeGame()" style="height: 50px; width: 100px;">Back To Lobby</button>
+            <h3>Game records are stored in your account information.</h3><br>
+            <table style="display: inline-block;">
+            <tr>
+                <td><button onclick="closeModal()" style="height: 50px; width: 100px;">Show Results</button></td>
+                <td><button onclick="closeGame()" style="height: 50px; width: 100px;">Back To Lobby</button></td>
+            </tr>
+            </table>
         `;
     }
     modal.style.display = 'block';
@@ -154,7 +169,7 @@ socket.on('gameBroked', () => {
     insideModal.innerHTML = `
         <h2>Game Broked!!!</h2>
         <p>The game broked because the player was disconnected. Records will not be saved, so please return to the lobby.</p>
-        <button onclick="closeGame()" style="height: 50px; width: 100px;">Back To Lobby</button>
+        <button onclick="closeGame()" style="height: 100px; width: 100px;">Back To Lobby</button>
     `;
 });
 

@@ -7,6 +7,10 @@ module.exports = (lobbyIO, socket, roomList) => {
 
 
     socket.on('lobby:newplayer',() => { // 새로운 플레이어 입장
+        db.query('SELECT * FROM user WHERE username=?', [socket.request.user.username], (err, results) => {
+            results[0].password = '';
+            socket.emit('lobby:resUserData', results[0]);
+        });
         lobbyIO.emit('lobby:emitChat', 'Joined Lobby!!', socket.request.user.username);
     });
 

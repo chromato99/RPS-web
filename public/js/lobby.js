@@ -62,7 +62,7 @@ socket.on('lobby:resRoomList', (data) => {
         <th>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</th>
     `;
     data.forEach((elem) => {
-        if(!elem.started) {
+        if(!elem.started && !elem.ended) {
             roomList.innerHTML += '<tr>'
             roomList.innerHTML += `
                 <td>${elem.name}</td>

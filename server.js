@@ -207,7 +207,8 @@ app.post('/newroom', (req, res) => {
             players: new Array(),
             max_player_count: req.body.max,
             ready: 0,
-            started: false
+            started: false,
+            ended: false
         };
         roomList.push(room);
         
@@ -224,7 +225,7 @@ app.get('/game/:roomname', (req, res) => {
             if(req.params.roomname == elem.name) {
                 room = elem;
             }
-            if(elem.players.length == elem.max_player_count || elem.started) {
+            if(elem.players.length == elem.max_player_count || elem.started || elem.ended) {
                 res.redirect('/lobby');
             }
         });
