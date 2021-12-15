@@ -121,7 +121,7 @@ socket.on('lobby:invite', (username, roomname) => {
     var userData = document.getElementById('userdata');
     userData.innerHTML = `
         <p>User name : ${username}</p>
-        <p>Invited you to </p>
+        <p>Invited you to ${roomname}</p>
         <button><a href="/game/${roomname}">Accept Invite</a></button>
         <button onclick="closeModal()">Cancel</button>
     `;
