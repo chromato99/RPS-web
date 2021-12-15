@@ -9,7 +9,7 @@ This is a service that provides a rock-paper-scissors(RPS) web game.
 
 It was developed with the goal of implementing experimental features for the realization of online web games. The game was implemented simply and focused on features such as account creation, management, game room creation, game invitation, and chatting.
 
--Main Features
+- Main Features
 Account management (login, signup, logout, etc.)<br>
 Security (Passwords are encrypted with Node.js crypto library)<br>
 Making game room (Managements with roomList array)<br>
