@@ -62,5 +62,6 @@ module.exports = (lobbyIO, socket, roomList) => {
 
     socket.on('disconnect', (reason) => {
         db.query('UPDATE user SET last_connection=NOW() WHERE username=?', [socket.request.user.username]);
+        lobbyIO.emit('lobby:emitChat', ' Disconnected', socket.request.user.username);
     });
 }
