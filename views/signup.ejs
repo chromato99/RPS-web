@@ -11,6 +11,8 @@
         function check_pw() {
             if(document.getElementById('password').value.length < 6) {
                 document.getElementById('check2').innerHTML = 'The password must at least 6 characters';
+            } else {
+                document.getElementById('check2').innerHTML = '';
             }
 
             //if 2 passwords all have value, not null
