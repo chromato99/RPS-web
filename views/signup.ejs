@@ -9,12 +9,15 @@
     <script>
         //function for input of checking whether user input password, and re input of password are the same
         function check_pw() {
+            if(document.getElementById('password').value.length < 6) {
+                document.getElementById('check2').innerHTML = 'The password must at least 6 characters';
+            }
 
             //if 2 passwords all have value, not null
             if (document.getElementById('password').value != '' && document.getElementById('re-password').value != '') {
                 //if 2 passwords have same value
                 if (document.getElementById('password').value == document.getElementById('re-password').value) {
-                    document.getElementById('check').innerHTML = 'The password matches.'
+                    document.getElementById('check').innerHTML = 'The password matches.';
                     document.getElementById('check').style.color = 'blue';
                 }
                 //if 2 passwords don't match
@@ -100,13 +103,14 @@
                 </div>
                     <!-- divide for the bottom part of the centeral part, where submit button, link back to log in file exists -->
                 <div class="btm">
-                    <p><span id="check"><%= message %> </span><br><br><br>
+                    <span id="check"><%= message %></span><br>
+                    <span id="check2"></span><br><br>
                         <!-- submit input data to the DB -->
                         <input type='submit' value="Sign Up"
-                            style="border-radius: 5px; margin-right:-4px; border: 1px solid rgb(235, 135, 230); background-color: rgba(0,0,0,0); color: rgb(245, 53, 171); padding: 10px; font-size: 20px;">
-                    <p>
+                            style="border-radius: 5px; margin-right:-4px; border: 1px solid rgb(235, 135, 230); background-color: rgba(0,0,0,0); color: rgb(245, 53, 171); padding: 10px; font-size: 20px;"><br>
+                    
                         <!-- if user already have ID then, go back to log in page -->
-                    <p><a href="/login" style="font-size: 25px;"><b>Do you already have an account?</b></a>
+                    <a href="/login" style="font-size: 25px;"><b>Do you already have an account?</b></a>
                 </div>
             </form>
         </div>
