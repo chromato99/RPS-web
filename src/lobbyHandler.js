@@ -12,6 +12,8 @@ module.exports = (lobbyIO, socket, roomList) => {
             db.end();
         });
         lobbyIO.emit('lobby:emitChat', 'Joined Lobby!!', socket.request.user.username);
+
+        lobbyIO.emit('lobby:userListUpdated');
     });
 
     socket.on('lobby:sendChat', (msg) => { // Protocol request for sending chat
@@ -57,10 +59,10 @@ module.exports = (lobbyIO, socket, roomList) => {
         socket.emit('lobby:resRoomList', roomList);
     });
 
-    socket.on('lobby:reqUserData', (username) => { // Protocol request to get user account data
+    socket.on('lobby:reqUserData', () => { // Protocol request to get user account data
         let db = mysql.createConnection(db_config);
         db.connect();
-        db.query('SELECT * FROM user WHERE username=?', [username], (err, results) => {
+        db.query('SELECT * FROM user WHERE username=?', [socket.request.user.username], (err, results) => {
             results[0].password = '';
             socket.emit('lobby:resUserData', results[0]);
             db.end();
@@ -73,5 +75,7 @@ module.exports = (lobbyIO, socket, roomList) => {
         db.query('UPDATE user SET last_connection=NOW() WHERE username=?', [socket.request.user.username]);
         lobbyIO.emit('lobby:emitChat', ' Disconnected', socket.request.user.username);
         db.end();
+
+        lobbyIO.emit('lobby:userListUpdated');
     });
 }

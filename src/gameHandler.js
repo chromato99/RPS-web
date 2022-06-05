@@ -180,6 +180,7 @@ module.exports = (gameIO, lobbyIO, socket, roomList) => {
             for(let i = 0; i < roomList.length; i++) {
                 if(roomList[i].name == socket.data.room.name) {
                     roomList.splice(i, 1);
+                    lobbyIO.emit('lobby:resRoomList', roomList);
                     return;
                 }
             }

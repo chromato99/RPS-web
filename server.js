@@ -224,7 +224,8 @@ app.post('/newroom', (req, res) => { // Making new room request
             ended: false
         };
         roomList.push(room);
-        
+        lobbyIO.emit('lobby:resRoomList', roomList);
+
         res.redirect('/game/' + req.body.roomname);
     }
 });

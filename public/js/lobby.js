@@ -35,7 +35,7 @@ window.onclick = function (event) {
 function getUserData(username) {
     modal.style.display = "block";
     console.log(username);
-    socket.emit('lobby:reqUserData', username);
+    socket.emit('lobby:reqUserData');
 }
 
 // When whisper button onclicked
@@ -127,6 +127,10 @@ socket.on('lobby:invite', (username, roomname) => {
         <button><a href="/game/${roomname}">Accept Invite</a></button>
         <button onclick="closeModal()">Cancel</button>
     `;
+});
+
+socket.on('lobby:userListUpdated', () => {
+    socket.emit('lobby:reqUserList');
 });
 
 // Chat send button onclicked
