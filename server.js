@@ -6,16 +6,12 @@ let port = 80;
 let server = require('http').createServer(app);
 let session = require('express-session');
 let MySQLStore = require('express-mysql-session')(session);
-let flash = require('connect-flash');
 let compression = require('compression');
 let crypto = require('crypto');
 let passport = require('passport');
 let LocalStrategy = require('passport-local').Strategy;
-let ejs = require('ejs');
 let mysql = require('mysql');
 let io = require('socket.io')(server);
-const bodyParser = require('body-parser');
-const { SocketAddress } = require('net');
 const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
 
 const db_config = require('./src/db-config');
@@ -169,7 +165,7 @@ app.post('/signup', (req, res) => { // Sign Up request
     db.query('SELECT * FROM user WHERE username=?', [req.body.username], (err, results) => {
         if(err)
             res.render('signup', {message: 'Please input sign up data'});
-        if(!!results[0])
+        if(results[0])
             res.render('signup', {message: 'Already existing username!!'});
         else {
             // Encrypting password with random salt and inserting new user data in database
