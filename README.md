@@ -54,7 +54,7 @@ server.js : Main execution of this service
 1) Set MySQL server and table structure as below. (If you want to use different table structure, you need to edit source code)
 <img src="https://user-images.githubusercontent.com/20539422/146132430-468d0141-fcca-4092-b45b-97e36aabeb8b.png"  width="65%" height="65%"/>
 
-2) Rename db.template.js to db-config.js and set with your db configuration.
+2) Rename db-config.template.js to db-config.js and set with your db configuration.
 ```javascript
 var dbConfig ={
     host:'example.com',
@@ -63,8 +63,18 @@ var dbConfig ={
     database:'RPS'
 });
 ```
+3) Issuing ssl certificate for https (recommended to use [Let's encrypt](https://letsencrypt.org))
 
-3) Run Server with Node.js
+4) Rename ssl-config.template.js to ssl-config.js and set with your ssl certificate file path.
+```javascript
+exports.option = {
+    ca: fs.readFileSync('/etc/letsencrypt/live/chromato99.com/fullchain.pem'),
+    key: fs.readFileSync('/etc/letsencrypt/live/chromato99.com/privkey.pem'),
+    cert: fs.readFileSync('/etc/letsencrypt/live/chromato99.com/cert.pem')
+};
+```
+
+5) Run Server with Node.js
 ```
 cd <project directory>
 npm install
