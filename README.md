@@ -2,7 +2,7 @@
 Rock Paper Scissor online web game.<br>
 Gachon university networking term project.
 
-Page for testing : http://rps.chromato99.com<br>
+Page for testing : https://rps.chromato99.com<br>
 Introduction Presentation : https://docs.google.com/presentation/d/13WQcaGt_m3o0Vy_2mk-JOX5i9i28YUh_/edit?usp=sharing&ouid=115551594729015574224&rtpof=true&sd=true
 
 # Description
