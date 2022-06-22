@@ -63,18 +63,10 @@ var dbConfig ={
     database:'RPS'
 });
 ```
-3) Issuing ssl certificate for https (recommended to use [Let's encrypt](https://letsencrypt.org))
+3) (Optinal) Issuing ssl certificate for https (recommended to use [Let's encrypt](https://letsencrypt.org))<br>
+Install nginx and configure ssl.
 
-4) Rename ssl-config.template.js to ssl-config.js and set with your ssl certificate file path.
-```javascript
-exports.option = {
-    ca: fs.readFileSync('/etc/letsencrypt/live/chromato99.com/fullchain.pem'),
-    key: fs.readFileSync('/etc/letsencrypt/live/chromato99.com/privkey.pem'),
-    cert: fs.readFileSync('/etc/letsencrypt/live/chromato99.com/cert.pem')
-};
-```
-
-5) Run Server with Node.js
+4) Run Server with Node.js
 ```
 cd <project directory>
 npm install
