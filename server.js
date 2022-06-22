@@ -1,17 +1,8 @@
-// Redirect to https url
-let http = require('http');
-http.createServer(function (req, res) {
-    res.writeHead(301, { "Location": "https://" + req.headers['host'] + req.url });
-    res.end();
-}).listen(80);
-
-const ssl = require('./src/ssl-config');
-
 let express = require('express');
 let app = express();
-let port = 443;
+let port = 8001;
 
-let server = require('https').createServer(ssl.option, app);
+let server = require('http').createServer(app);
 let session = require('express-session');
 let MySQLStore = require('express-mysql-session')(session);
 let compression = require('compression');
