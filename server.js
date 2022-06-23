@@ -160,7 +160,7 @@ app.get('/signup', (req, res) => { // signup page
 app.post('/signup', (req, res) => { // Sign Up request
     let db = mysql.createConnection(db_config);
     db.connect();
-    console.log(res.body)
+    console.log(req.body)
     db.query('SELECT * FROM user WHERE username=?', [req.body.username], (err, results) => {
         if(err)
             res.render('signup', {message: 'Please input sign up data'});
@@ -175,8 +175,9 @@ app.post('/signup', (req, res) => { // Sign Up request
                     "insert into user(username, password, email, win, loss, draw,last_connection) values(?,?,?, 0, 0, 0, NOW())",  
                     [req.body.username, passwordWithSalt, req.body.email], (err2)=> {
                         db.end();
-                        if(err2) 
-                            res.render('signup', {message: 'failed creating new account'}); // if error occurred
+                        if(err2) {
+                            res.render('signup', {message: err2.sqlMessage}); // if error occurred
+                        }
                         else
                             res.redirect('/login');
                 });
